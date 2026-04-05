@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 import urllib.parse
 
 # --- CONFIGURACIÓN DE PÁGINA ---
-st.set_page_config(page_title="Saúl Streaming Pro V4.7", page_icon="💰", layout="wide")
+st.set_page_config(page_title="Saúl Streaming Pro V4.8", page_icon="💰", layout="wide")
 
 PLATAFORMAS_CONFIG = {
     "NETFLIX": 5, "MAX": 5, "PRIME VIDEO": 6, "DISNEY": 7, "CRUNCHYROLL": 5, "VIX": 5
@@ -31,8 +31,8 @@ def init_db():
 init_db()
 
 # --- MENÚ LATERAL ---
-st.sidebar.title("🎬 Saúl Streaming v4.7")
-menu = st.sidebar.radio("Ir a:", ["📊 Dashboard", "🌐 PLATAFORMAS", "📱 Gestión de Perfiles", "🔔 Notificaciones", "📅 Proveedores", "💰 Finanzas"])
+st.sidebar.title("🎬 Saúl Streaming v4.8")
+menu = st.sidebar.radio("Ir a:", ["📊 Dashboard", "🌐 PLATAFORMAS", "📱 Gestión de Perfiles", "🔔 Notificaciones", "📅 Proveedores", "💰 Finanzas Pro"])
 
 # --- 1. DASHBOARD ---
 if menu == "📊 Dashboard":
@@ -53,7 +53,7 @@ if menu == "📊 Dashboard":
     df_clientes = pd.read_sql_query("SELECT plataforma, email, nombre, whatsapp, fecha_vence FROM perfiles WHERE estado='VENDIDO'", conn)
     st.dataframe(df_clientes, use_container_width=True)
 
-# --- 2. PLATAFORMAS ---
+# --- 2. PLATAFORMAS (CARGA EN 2 COLUMNAS) ---
 elif menu == "🌐 PLATAFORMAS":
     st.title("🌐 Registro de Plataformas")
     plat_sel = st.selectbox("1. Selecciona la Plataforma:", list(PLATAFORMAS_CONFIG.keys()))
@@ -68,13 +68,16 @@ elif menu == "🌐 PLATAFORMAS":
         
         perfiles_lista = []
         st.write("---")
-        st.write("📝 **Nombres y PINs de Perfiles**")
-        cols = st.columns(3)
+        st.write("📝 **Nombres y PINs de Perfiles (2 Columnas)**")
+        
+        # Generar perfiles en solo 2 columnas
         for i in range(num_perfiles):
-            with cols[i % 3]:
-                p_n = st.text_input(f"Perfil {i+1}", f"P{i+1}", key=f"n_{i}")
-                p_p = st.text_input(f"PIN", "0000", key=f"p_{i}")
-                perfiles_lista.append((p_n, p_p))
+            col_nom, col_pin = st.columns(2)
+            with col_nom:
+                p_n = st.text_input(f"Nombre Perfil {i+1}", f"P{i+1}", key=f"n_{i}")
+            with col_pin:
+                p_p = st.text_input(f"PIN Perfil {i+1}", "0000", key=f"p_{i}")
+            perfiles_lista.append((p_n, p_p))
         
         if st.form_submit_button("🚀 GUARDAR PLATAFORMA"):
             if mail and pasw:
@@ -108,7 +111,7 @@ elif menu == "📱 Gestión de Perfiles":
         
         for _, row in perfiles.iterrows():
             status = "🟢 LIBRE" if row['estado'] == 'LIBRE' else f"🔴 VENDIDO a {row['whatsapp']}"
-            with st.expander(f"{row['nombre']} | {status}"):
+            with st.expander(f"{row['nombre']} | PIN: {row['pin']} | {status}"):
                 c1, c2 = st.columns(2)
                 if row['estado'] == 'LIBRE':
                     wa = c1.text_input("📱 WhatsApp Cliente (ej: 51930...):", key=f"wa_{row['id']}")
@@ -118,7 +121,6 @@ elif menu == "📱 Gestión de Perfiles":
                         conn.commit(); st.rerun()
                 else:
                     c1.write(f"📅 **Vence:** {row['fecha_vence']}")
-                    # FORMATO ELEGANTE CON EMOJIS
                     msg_entrega = (
                         f"💎 *ENTREGA DE CUENTA - {row['plataforma']}* 💎\n\n"
                         f"📧 *Correo:* `{sel_mail}`\n"
@@ -139,16 +141,20 @@ elif menu == "📱 Gestión de Perfiles":
                         conn.cursor().execute(f"UPDATE perfiles SET estado='LIBRE', whatsapp=None, fecha_vence=None WHERE id={row['id']}")
                         conn.commit(); st.rerun()
 
-# --- 4. NOTIFICACIONES ---
+# --- 4. NOTIFICACIONES (FILTRADO POR PLATAFORMA) ---
 elif menu == "🔔 Notificaciones":
     st.title("🔔 Central de Cobranza WhatsApp")
     conn = get_db()
-    df_n = pd.read_sql_query("SELECT * FROM perfiles WHERE estado='VENDIDO'", conn)
+    
+    # Filtro dinámico por plataforma
+    plat_cobro = st.selectbox("🔍 Cobrar por Plataforma:", list(PLATAFORMAS_CONFIG.keys()))
+    
+    df_n = pd.read_sql_query(f"SELECT * FROM perfiles WHERE estado='VENDIDO' AND plataforma='{plat_cobro}'", conn)
     
     if df_n.empty:
-        st.success("No hay perfiles vendidos actualmente.")
+        st.success(f"No hay perfiles de {plat_cobro} por vencer pronto.")
     else:
-        st.write("A continuación se muestran los clientes ordenados por fecha de vencimiento:")
+        st.write(f"A continuación se muestran los clientes de **{plat_cobro}** ordenados por fecha de vencimiento:")
         for _, r in df_n.iterrows():
             fv = datetime.strptime(r['fecha_vence'], "%d/%m/%Y")
             diff = (fv - datetime.now()).days
@@ -156,7 +162,7 @@ elif menu == "🔔 Notificaciones":
             icon = "⏰" if diff <= 2 else "🗓️"
             with st.container():
                 col1, col2 = st.columns([3, 1])
-                col1.write(f"{icon} **{r['plataforma']}** | Perfil: *{r['nombre']}* | Vence en: **{diff} días** ({r['fecha_vence']})")
+                col1.write(f"{icon} Perfil: *{r['nombre']}* | Vence en: **{diff} días** ({r['fecha_vence']})")
                 
                 msg_cobro = f"👋 Hola *{r['nombre']}*, te saluda Saúl Streaming 🎬. Te recordamos que tu perfil de *{r['plataforma']}* vence el *{r['fecha_vence']}*. ¿Deseas renovar para no perder tu acceso? ✨"
                 url_cobro = f"https://wa.me/{r['whatsapp']}?text={urllib.parse.quote(msg_cobro)}"
@@ -170,25 +176,62 @@ elif menu == "📅 Proveedores":
     df_p = pd.read_sql_query("SELECT plataforma, email, password, fecha_proveedor, costo FROM cuentas", conn)
     st.dataframe(df_p, use_container_width=True)
 
-# --- 6. FINANZAS ---
-elif menu == "💰 Finanzas":
-    st.title("💰 Reporte Financiero de Saúl")
+# --- 6. FINANZAS PRO (POR PLATAFORMA + TOTALES) ---
+elif menu == "💰 Finanzas Pro":
+    st.title("💰 Reporte Financiero Saúl Pro")
     conn = get_db()
     
-    costo_total = pd.read_sql_query("SELECT SUM(costo) as t FROM cuentas", conn)['t'][0] or 0
-    total_vendidos = pd.read_sql_query("SELECT COUNT(*) as t FROM perfiles WHERE estado='VENDIDO'", conn)['t'][0]
+    # --- CUADRO LATERAL DE PRECIOS DE VENTA ---
+    st.sidebar.markdown("### 💵 Configurar Precios de Venta")
+    precios_venta = {}
+    for plat in PLATAFORMAS_CONFIG.keys():
+        precios_venta[plat] = st.sidebar.number_input(f"Venta promedio {plat} (S/):", value=10.0, step=0.5)
     
-    # Supongamos que vendes cada perfil a un promedio de S/ 10.00
-    st.sidebar.divider()
-    precio_venta = st.sidebar.number_input("Precio de venta promedio (S/):", value=10.0)
+    # --- CÁLCULOS GENERALES ---
+    costo_total_gen = pd.read_sql_query("SELECT SUM(costo) as t FROM cuentas", conn)['t'][0] or 0
     
-    ingresos_brutos = total_vendidos * precio_venta
-    utilidad = ingresos_brutos - costo_total
+    # Calcular ingresos totales sumando los vendidos de cada plataforma por su precio
+    ingresos_totales_gen = 0
+    for plat, precio in precios_venta.items():
+        vendidos_plat = pd.read_sql_query(f"SELECT COUNT(*) as t FROM perfiles WHERE estado='VENDIDO' AND plataforma='{plat}'", conn)['t'][0]
+        ingresos_totales_gen += (vendidos_plat * precio)
+    
+    ganancia_total_gen = ingresos_totales_gen - costo_total_gen
 
-    f1, f2, f3 = st.columns(3)
-    f1.metric("💸 Inversión (Proveedores)", f"S/ {costo_total:.2f}")
-    f2.metric("📈 Ingresos Brutos", f"S/ {ingresos_brutos:.2f}")
-    f3.metric("🤑 Utilidad Neta", f"S/ {utilidad:.2f}", delta=f"{(utilidad/costo_total*100 if costo_total > 0 else 0):.1f}% ROI")
-
-    st.write("---")
-    st.info("💡 **Consejo:** Registra el costo de cada cuenta en el menú 'PLATAFORMAS' para que este reporte sea exacto.")
+    # --- CUADRO DE TOTALES GENERALES ---
+    st.markdown("## 📊 TOTALES GENERALES")
+    tg1, tg2, tg3 = st.columns(3)
+    tg1.metric("💸 Inversión Total (Proveedores)", f"S/ {costo_total_gen:.2f}")
+    tg2.metric("📈 Ingresos Brutos Totales", f"S/ {ingresos_totales_gen:.2f}")
+    
+    # Color de la ganancia
+    color_ganancia = "normal" if ganancia_total_gen >= 0 else "inverse"
+    tg3.metric("🤑 Utilidad Neta Total", f"S/ {ganancia_total_gen:.2f}", delta_color=color_ganancia)
+    
+    st.divider()
+    
+    # --- DETALLE POR PLATAFORMA ---
+    st.markdown("## 📊 DETALLE POR PLATAFORMA")
+    
+    data_finanzas = []
+    for plat, precio_v in precios_venta.items():
+        # Costo (Egresos) de esta plataforma
+        costo_plat = pd.read_sql_query(f"SELECT SUM(costo) as t FROM cuentas WHERE plataforma='{plat}'", conn)['t'][0] or 0
+        # Perfiles Vendidos
+        vendidos_plat = pd.read_sql_query(f"SELECT COUNT(*) as t FROM perfiles WHERE estado='VENDIDO' AND plataforma='{plat}'", conn)['t'][0]
+        # Ingresos Brutos
+        ingresos_plat = vendidos_plat * precio_v
+        # Utilidad
+        utilidad_plat = ingresos_plat - costo_plat
+        
+        data_finanzas.append({
+            "PLATAFORMA": plat,
+            "Costo (Egresos)": f"S/ {costo_plat:.2f}",
+            "Vendidos": vendidos_plat,
+            "Precio Venta": f"S/ {precio_v:.2f}",
+            "Ingresos Brutos": f"S/ {ingresos_plat:.2f}",
+            "Utilidad Neta": f"S/ {utilidad_plat:.2f}"
+        })
+    
+    df_finanzas = pd.DataFrame(data_finanzas)
+    st.dataframe(df_finanzas, use_container_width=True, hide_index=True)
