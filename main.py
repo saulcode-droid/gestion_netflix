@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 import urllib.parse
 
 # --- CONFIGURACIÓN DE PÁGINA ---
-st.set_page_config(page_title="Gestión Netflix Saúl", page_icon="🎬", layout="wide")
+st.set_page_config(page_title="Gestión Streaming Saúl", page_icon="🎬", layout="wide")
 
 # --- CONEXIÓN BASE DE DATOS ---
 def get_db():
@@ -15,6 +15,7 @@ def get_db():
 def init_db():
     conn = get_db()
     cursor = conn.cursor()
+    # Actualizamos tabla para incluir contraseña si no existe
     cursor.execute('''CREATE TABLE IF NOT EXISTS cuentas 
                       (id INTEGER PRIMARY KEY, email TEXT UNIQUE, password TEXT, fecha_proveedor TEXT)''')
     cursor.execute('''CREATE TABLE IF NOT EXISTS perfiles 
@@ -24,24 +25,22 @@ def init_db():
 
 init_db()
 
-# --- INTERFAZ LATERAL (MENÚ) ---
+# --- INTERFAZ LATERAL ---
 st.sidebar.title("🚀 Panel de Control")
 opcion = st.sidebar.radio("Selecciona una opción:", 
-                         ["📊 Dashboard", "➕ Subir Cuentas", "📱 Gestionar Perfiles", "📅 Vencimientos Proveedor"])
+                         ["📊 Dashboard", "➕ Subir Cuentas", "📱 Gestionar Perfiles", "📅 Proveedores", "🔔 Notificaciones"])
 
-# --- LÓGICA DE DASHBOARD ---
+# --- DASHBOARD ---
 if opcion == "📊 Dashboard":
     st.title("📊 Resumen de Inventario")
     conn = get_db()
-    
-    # Métricas rápidas
     total_ctas = pd.read_sql_query("SELECT COUNT(*) as total FROM cuentas", conn)['total'][0]
     total_vendidos = pd.read_sql_query("SELECT COUNT(*) as total FROM perfiles WHERE estado='VENDIDO'", conn)['total'][0]
     total_libres = pd.read_sql_query("SELECT COUNT(*) as total FROM perfiles WHERE estado='LIBRE'", conn)['total'][0]
     
     col1, col2, col3 = st.columns(3)
     col1.metric("Cuentas Totales", total_ctas)
-    col2.metric("Perfiles Vendidos", total_vendidos, delta_color="inverse")
+    col2.metric("Perfiles Vendidos", total_vendidos)
     col3.metric("Perfiles Libres", total_libres)
 
     st.subheader("👥 Clientes Activos")
@@ -51,89 +50,76 @@ if opcion == "📊 Dashboard":
 # --- SUBIR CUENTAS ---
 elif opcion == "➕ Subir Cuentas":
     st.title("➕ Registrar Nueva Cuenta")
-    
     with st.form("form_subida"):
         email = st.text_input("Correo electrónico:")
         password = st.text_input("Contraseña:")
         f_prov = st.date_input("Vencimiento con Proveedor:")
-        st.write("Configura los 5 Perfiles (Nombre:PIN)")
         p1 = st.text_input("Perfil 1", "P1:0000")
         p2 = st.text_input("Perfil 2", "P2:0000")
         p3 = st.text_input("Perfil 3", "P3:0000")
         p4 = st.text_input("Perfil 4", "P4:0000")
         p5 = st.text_input("Perfil 5", "P5:0000")
-        
-        btn_subir = st.form_submit_button("Guardar Cuenta")
-        
-        if btn_subir:
+        if st.form_submit_button("Guardar Cuenta"):
             conn = get_db()
             cursor = conn.cursor()
             try:
                 cursor.execute("INSERT INTO cuentas (email, password, fecha_proveedor) VALUES (?,?,?)", 
                                (email, password, f_prov.strftime("%d/%m/%Y")))
-                
-                perfiles_lista = [p1, p2, p3, p4, p5]
-                for p in perfiles_lista:
+                for p in [p1, p2, p3, p4, p5]:
                     nom, pin = p.split(':')
-                    cursor.execute("INSERT INTO perfiles (email, nombre, pin) VALUES (?,?,?)", (email, nom, pin))
-                
+                    cursor.execute("INSERT INTO perfiles (email, nombre, pin) VALUES (?,?,?)", (email, nom.strip(), pin.strip()))
                 conn.commit()
-                st.success(f"✅ Cuenta {email} cargada correctamente.")
-            except Exception as e:
-                st.error(f"❌ Error: El correo ya existe o el formato es incorrecto.")
+                st.success(f"✅ Cuenta {email} cargada.")
+            except: st.error("Error al subir.")
 
-# --- GESTIONAR PERFILES (Vender / Notificar / Cortar) ---
+# --- GESTIONAR PERFILES ---
 elif opcion == "📱 Gestionar Perfiles":
-    st.title("📱 Administración de Perfiles")
+    st.title("📱 Administración")
     conn = get_db()
-    
     emails = pd.read_sql_query("SELECT email FROM cuentas", conn)['email'].tolist()
-    if not emails:
-        st.warning("No hay cuentas registradas.")
-    else:
-        sel_email = st.selectbox("Selecciona una cuenta para gestionar:", emails)
-        
-        # Traer clave de la cuenta
-        clave = pd.read_sql_query(f"SELECT password FROM cuentas WHERE email='{sel_email}'", conn)['password'][0]
-        st.info(f"🗝 **Contraseña de la cuenta:** `{clave}`")
-        
+    if emails:
+        sel_email = st.selectbox("Seleccionar cuenta:", emails)
         perfiles = pd.read_sql_query(f"SELECT id, nombre, pin, estado, whatsapp, fecha_vence FROM perfiles WHERE email='{sel_email}'", conn)
-        
-        for index, row in perfiles.iterrows():
-            with st.expander(f"👤 {row['nombre']} | PIN: {row['pin']} | {row['estado']}"):
-                col_a, col_b = st.columns(2)
-                
+        for i, row in perfiles.iterrows():
+            with st.expander(f"👤 {row['nombre']} - {row['estado']}"):
                 if row['estado'] == 'LIBRE':
-                    wa = col_a.text_input(f"WhatsApp del Cliente (+)", key=f"wa_{row['id']}")
-                    if col_a.button(f"🔴 Marcar como Vendido", key=f"btn_v_{row['id']}"):
-                        f_v = (datetime.now() + timedelta(days=30)).strftime("%d/%m/%Y")
-                        conn.cursor().execute(f"UPDATE perfiles SET estado='VENDIDO', whatsapp='{wa}', fecha_vence='{f_v}' WHERE id={row['id']}")
-                        conn.commit()
-                        st.rerun()
+                    wa = st.text_input("WhatsApp Cliente:", key=f"wa_{row['id']}")
+                    if st.button("🔴 Vender", key=f"v_{row['id']}"):
+                        fv = (datetime.now() + timedelta(days=30)).strftime("%d/%m/%Y")
+                        conn.cursor().execute(f"UPDATE perfiles SET estado='VENDIDO', whatsapp='{wa}', fecha_vence='{fv}' WHERE id={row['id']}")
+                        conn.commit(); st.rerun()
                 else:
-                    col_a.write(f"📱 **Cliente:** {row['whatsapp']}")
-                    col_a.write(f"📅 **Vence:** {row['fecha_vence']}")
-                    
-                    if col_a.button("✂️ Cortar Servicio (Liberar)", key=f"cut_{row['id']}"):
+                    st.write(f"📱 WhatsApp: {row['whatsapp']} | 📅 Vence: {row['fecha_vence']}")
+                    if st.button("✂️ Liberar Perfil", key=f"lib_{row['id']}"):
                         conn.cursor().execute(f"UPDATE perfiles SET estado='LIBRE', whatsapp=None, fecha_vence=None WHERE id={row['id']}")
-                        conn.commit()
-                        st.rerun()
-                    
-                    # Botones de Notificación
-                    st.write("---")
-                    st.write("🔔 **Enviar Notificación por WhatsApp:**")
-                    msg1 = "Hola, tu perfil vence mañana. ¿Deseas renovar?"
-                    msg2 = "Hola, tu perfil vence hoy. Evita el corte."
-                    
-                    url1 = f"https://wa.me/{row['whatsapp']}?text={urllib.parse.quote(msg1)}"
-                    url2 = f"https://wa.me/{row['whatsapp']}?text={urllib.parse.quote(msg2)}"
-                    
-                    st.markdown(f"[📩 Avisar Vence Mañana]({url1})", unsafe_allow_html=True)
-                    st.markdown(f"[📩 Avisar Vence Hoy]({url2})", unsafe_allow_html=True)
+                        conn.commit(); st.rerun()
 
-# --- VENCIMIENTOS PROVEEDOR ---
-elif opcion == "📅 Vencimientos Proveedor":
-    st.title("📅 Renovación con Proveedores")
+# --- PROVEEDORES (AHORA CON CONTRASEÑA) ---
+elif opcion == "📅 Proveedores":
+    st.title("📅 Cuentas y Contraseñas")
     conn = get_db()
-    df_prov = pd.read_sql_query("SELECT email, fecha_proveedor FROM cuentas ORDER BY id DESC", conn)
-    st.table(df_prov)
+    df_prov = pd.read_sql_query("SELECT email, password, fecha_proveedor FROM cuentas", conn)
+    st.dataframe(df_prov, use_container_width=True)
+
+# --- CENTRAL DE NOTIFICACIONES ---
+elif opcion == "🔔 Notificaciones":
+    st.title("🔔 Recordatorios de Pago")
+    conn = get_db()
+    df_vence = pd.read_sql_query("SELECT email, nombre, whatsapp, fecha_vence FROM perfiles WHERE estado='VENDIDO'", conn)
+    
+    if not df_vence.empty:
+        hoy = datetime.now()
+        for idx, r in df_vence.iterrows():
+            f_vence = datetime.strptime(r['fecha_vence'], "%d/%m/%Y")
+            dias_restantes = (f_vence - hoy).days
+            
+            if dias_restantes <= 2: # Avisar si faltan 2 días o menos
+                col1, col2 = st.columns([3, 1])
+                col1.warning(f"⚠️ {r['nombre']} (+{r['whatsapp']}) vence en {max(0, dias_restantes)} días.")
+                
+                # Mensaje personalizado
+                msg = f"Hola {r['nombre']}, te saludamos de Saúl Streaming 🎬. Te recordamos que tu perfil vence el {r['fecha_vence']}. ¡Renueva ahora para no perder tu acceso!"
+                url = f"https://wa.me/{r['whatsapp']}?text={urllib.parse.quote(msg)}"
+                col2.markdown(f"[📲 Enviar WhatsApp]({url})")
+    else:
+        st.success("No hay clientes por vencer pronto.")
