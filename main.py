@@ -30,7 +30,7 @@ def init_db():
 init_db()
 
 # --- MENÚ LATERAL ---
-st.sidebar.title("🎬 Saúl Streaming v5.0")
+st.sidebar.title("🎬 Saúl Streaming")
 menu = st.sidebar.radio("Ir a:", ["📊 Dashboard", "🌐 PLATAFORMAS", "📱 Gestión de Perfiles", "🔔 Notificaciones", "📅 Proveedores", "💰 Finanzas Pro", "🗑️ Eliminar Cuentas"])
 
 # --- 1. DASHBOARD ---
