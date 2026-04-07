@@ -62,7 +62,6 @@ button[kind="headerNoPadding"] { display: none !important; }
     color: #E2E8F0;
 }
 
-/* ─── SIDEBAR (solo desktop) ─── */
 section[data-testid="stSidebar"] {
     background: #09090F !important;
     border-right: 1px solid rgba(255,255,255,0.06) !important;
@@ -85,7 +84,6 @@ section[data-testid="stSidebar"] .stRadio label:hover {
     color: #C4B5FD !important;
 }
 
-/* ─── TÍTULOS ─── */
 .title-main {
     font-family: 'Syne', sans-serif;
     font-size: 2rem;
@@ -106,7 +104,6 @@ section[data-testid="stSidebar"] .stRadio label:hover {
     margin-bottom: 1.8rem;
 }
 
-/* ─── MÉTRICAS ─── */
 div[data-testid="stMetric"] {
     background: linear-gradient(145deg, #0D0F1A 0%, #111320 100%) !important;
     border: 1px solid rgba(255,255,255,0.07) !important;
@@ -136,7 +133,6 @@ div[data-testid="stMetric"] [data-testid="stMetricValue"] {
     font-weight: 700 !important; font-family: 'Syne', sans-serif !important; 
 }
 
-/* ─── BOTONES BASE ─── */
 .stButton > button {
     background: linear-gradient(145deg, #13172A 0%, #0D1020 100%) !important;
     color: #CBD5E1 !important;
@@ -159,7 +155,6 @@ div[data-testid="stMetric"] [data-testid="stMetricValue"] {
 }
 .stButton > button:active { transform: translateY(0) scale(0.99) !important; }
 
-/* ─── BOTONES PLATAFORMA ─── */
 .plat-btn-NETFLIX .stButton > button { color: #FF6B7A !important; border-color: rgba(229,9,20,0.25) !important; }
 .plat-btn-NETFLIX .stButton > button:hover { background: linear-gradient(145deg, #4A0909, #7B0D0D) !important; color: #FCA5A5 !important; border-color: #E50914 !important; box-shadow: 0 8px 24px rgba(229,9,20,0.3) !important; }
 .plat-btn-MAX .stButton > button { color: #C084FC !important; border-color: rgba(123,44,191,0.25) !important; }
@@ -180,7 +175,6 @@ div[data-testid="stMetric"] [data-testid="stMetricValue"] {
 .plat-active-VIX .stButton > button { background: linear-gradient(145deg, #431407, #7C2D12) !important; color: #FED7AA !important; border-color: #FF5A00 !important; box-shadow: 0 4px 16px rgba(255,90,0,0.3) !important; }
 .plat-active-CRUNCHY .stButton > button { background: linear-gradient(145deg, #3D1A02, #7B3202) !important; color: #FDE68A !important; border-color: #F47521 !important; box-shadow: 0 4px 16px rgba(244,117,33,0.3) !important; }
 
-/* ─── BOTONES ACCIÓN ─── */
 .btn-sell .stButton > button { background: linear-gradient(135deg, #065F46, #047857) !important; border-color: rgba(16,185,129,0.4) !important; color: #6EE7B7 !important; }
 .btn-sell .stButton > button:hover { background: linear-gradient(135deg, #047857, #059669) !important; box-shadow: 0 8px 24px rgba(16,185,129,0.35) !important; color: #D1FAE5 !important; transform: translateY(-2px) scale(1.01) !important; }
 .btn-renew .stButton > button { background: linear-gradient(135deg, #1E1B4B, #2E2970) !important; border-color: rgba(99,102,241,0.4) !important; color: #A5B4FC !important; }
@@ -194,7 +188,6 @@ div[data-testid="stMetric"] [data-testid="stMetricValue"] {
 .btn-client .stButton > button { background: linear-gradient(135deg, #0C2436, #0E3D5C) !important; border-color: rgba(6,182,212,0.4) !important; color: #67E8F9 !important; }
 .btn-client .stButton > button:hover { background: linear-gradient(135deg, #155E75, #0E7490) !important; box-shadow: 0 8px 24px rgba(6,182,212,0.3) !important; color: #A5F3FC !important; transform: translateY(-2px) scale(1.01) !important; }
 
-/* ─── INPUTS ─── */
 .stTextInput input, .stNumberInput input, .stDateInput input {
     background: #0D0F1A !important;
     border: 1px solid rgba(255,255,255,0.08) !important;
@@ -217,7 +210,6 @@ div[data-testid="stMetric"] [data-testid="stMetricValue"] {
 }
 label { color: #64748B !important; font-size: 0.8rem !important; font-weight: 500 !important; letter-spacing: 0.06em !important; }
 
-/* ─── FORM ─── */
 .stForm {
     background: linear-gradient(145deg, #0D0F1A, #0A0C15) !important;
     border: 1px solid rgba(255,255,255,0.06) !important;
@@ -226,7 +218,6 @@ label { color: #64748B !important; font-size: 0.8rem !important; font-weight: 50
     box-shadow: 0 4px 24px rgba(0,0,0,0.4) !important;
 }
 
-/* ─── EXPANDER ─── */
 .streamlit-expanderHeader {
     background: linear-gradient(145deg, #0D0F1A, #111320) !important;
     border: 1px solid rgba(255,255,255,0.07) !important;
@@ -243,7 +234,6 @@ label { color: #64748B !important; font-size: 0.8rem !important; font-weight: 50
     padding: 16px !important;
 }
 
-/* ─── TARJETAS ─── */
 .card {
     background: linear-gradient(145deg, #0D0F1A, #111320);
     border: 1px solid rgba(255,255,255,0.06);
@@ -254,7 +244,6 @@ label { color: #64748B !important; font-size: 0.8rem !important; font-weight: 50
 }
 .card:hover { border-color: rgba(99,102,241,0.2); transform: translateX(2px); }
 
-/* ─── BADGES ─── */
 .badge { display: inline-flex; align-items: center; gap: 5px; border-radius: 8px; padding: 4px 12px; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; }
 .badge-libre { background: rgba(16,185,129,0.12); color: #34D399; border: 1px solid rgba(16,185,129,0.25); }
 .badge-vendido { background: rgba(239,68,68,0.12); color: #F87171; border: 1px solid rgba(239,68,68,0.25); }
@@ -262,7 +251,6 @@ label { color: #64748B !important; font-size: 0.8rem !important; font-weight: 50
 .badge-entregado { background: rgba(239,68,68,0.12); color: #F87171; border: 1px solid rgba(239,68,68,0.25); }
 .badge-cliente { background: rgba(6,182,212,0.12); color: #67E8F9; border: 1px solid rgba(6,182,212,0.25); }
 
-/* ─── LOGIN ─── */
 .login-wrap {
     background: linear-gradient(145deg, #040608, #070C0E);
     border: 1px solid rgba(0,255,140,0.15);
@@ -279,36 +267,29 @@ label { color: #64748B !important; font-size: 0.8rem !important; font-weight: 50
 .login-title { font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 800; background: linear-gradient(135deg, #00FF8C, #00D4FF); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-align: center; margin-bottom: 4px; }
 .login-sub { color: #1a3a2a; font-size: 0.78rem; text-align: center; margin-bottom: 36px; letter-spacing: 0.2em; text-transform: uppercase; font-family: 'DM Mono', monospace; }
 
-/* ─── USER BADGE ─── */
 .user-badge { background: linear-gradient(145deg, #0D0F1A, #111320); border: 1px solid rgba(255,255,255,0.07); border-radius: 16px; padding: 18px 16px; margin-bottom: 24px; text-align: center; }
 .user-avatar { width: 52px; height: 52px; border-radius: 16px; background: linear-gradient(135deg, #7C3AED, #06B6D4); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin: 0 auto 10px; box-shadow: 0 8px 20px rgba(124,58,237,0.35); }
 .user-name { color: #F1F5F9 !important; font-weight: 700; font-size: 0.95rem; font-family: 'Syne', sans-serif; }
 .user-role { display: inline-block; margin-top: 6px; color: #7C3AED !important; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.15em; background: rgba(124,58,237,0.1); border: 1px solid rgba(124,58,237,0.2); border-radius: 6px; padding: 3px 10px; }
 
-/* ─── MODO CARDS ─── */
 .modo-card { background: linear-gradient(145deg, #0D0F1A, #111320); border: 1px solid rgba(255,255,255,0.07); border-radius: 24px; padding: 44px 32px; text-align: center; transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1); }
 .modo-card:hover { border-color: rgba(99,102,241,0.3); transform: translateY(-6px); box-shadow: 0 24px 60px rgba(99,102,241,0.15); }
 .modo-icon { font-size: 3.2rem; margin-bottom: 18px; }
 .modo-title { font-family: 'Syne', sans-serif; color: #F1F5F9; font-weight: 800; font-size: 1.15rem; margin-bottom: 10px; }
 .modo-desc { color: #475569; font-size: 0.85rem; line-height: 1.6; }
 
-/* ─── PLAT HEADER ─── */
 .plat-header { display: flex; align-items: center; gap: 16px; background: linear-gradient(145deg, #0D0F1A, #111320); border: 1px solid rgba(255,255,255,0.07); border-radius: 16px; padding: 16px 22px; margin-bottom: 24px; }
 .plat-dot { width: 12px; height: 12px; border-radius: 50%; }
 
-/* ─── SEPARADORES ─── */
 .divider { border: none; border-top: 1px solid rgba(255,255,255,0.05); margin: 24px 0; }
 .glow-divider { border: none; height: 1px; margin: 28px 0; background: linear-gradient(90deg, transparent, rgba(99,102,241,0.3), rgba(6,182,212,0.3), transparent); }
 
-/* ─── KEY BOX ─── */
 .key-box { background: #080A12; border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 10px 16px; color: #34D399; font-family: 'DM Mono', monospace; font-size: 0.88rem; margin-bottom: 14px; }
 
-/* ─── DIAS ALERTA ─── */
 .d-ok { color: #34D399; font-weight: 700; }
 .d-warn { color: #FBBF24; font-weight: 700; }
 .d-danger { color: #F87171; font-weight: 700; }
 
-/* ─── CLIENTE CARD ─── */
 .client-card { background: linear-gradient(145deg, #080C18, #0D1020); border: 1px solid rgba(6,182,212,0.15); border-radius: 18px; padding: 20px 24px; margin: 10px 0; transition: all 0.25s ease; }
 .client-card:hover { border-color: rgba(6,182,212,0.35); transform: translateY(-2px); box-shadow: 0 12px 32px rgba(6,182,212,0.1); }
 
@@ -317,198 +298,185 @@ label { color: #64748B !important; font-size: 0.8rem !important; font-weight: 50
 ::-webkit-scrollbar-thumb { background: #1E1B4B; border-radius: 4px; }
 
 /* ════════════════════════════════
-   NAVEGACIÓN MÓVIL — DRAWER LATERAL
+   MENÚ MÓVIL — SOLUCIÓN ROBUSTA
    ════════════════════════════════ */
 
 /* Ocultar sidebar nativo en móvil */
 @media (max-width: 768px) {
     section[data-testid="stSidebar"] { display: none !important; }
-    .main .block-container { 
-        padding-left: 0.8rem !important; 
+    .main .block-container {
+        padding-left: 0.8rem !important;
         padding-right: 0.8rem !important;
         padding-bottom: 20px !important;
-        padding-top: 60px !important;
+        padding-top: 70px !important;
     }
 }
 
-/* Botón hamburguesa fijo arriba */
-#mobile-hamburger-btn {
+/* Checkbox oculto que controla el drawer */
+#mob-toggle {
+    display: none !important;
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Botón hamburguesa — solo visible en móvil */
+.mob-ham-label {
     display: none;
     position: fixed;
-    top: 10px;
-    left: 12px;
-    z-index: 99999;
-    background: rgba(10, 11, 20, 0.95);
-    border: 1px solid rgba(99,102,241,0.4);
-    border-radius: 12px;
-    width: 44px;
-    height: 44px;
+    top: 12px;
+    left: 14px;
+    z-index: 999999;
+    width: 46px;
+    height: 46px;
+    background: rgba(9,9,15,0.96);
+    border: 1px solid rgba(99,102,241,0.45);
+    border-radius: 13px;
     cursor: pointer;
     align-items: center;
     justify-content: center;
-    font-size: 1.3rem;
+    font-size: 1.4rem;
     color: #A5B4FC;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-    transition: all 0.2s ease;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.6);
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    transition: background 0.2s, transform 0.15s;
 }
-#mobile-hamburger-btn:active {
-    transform: scale(0.95);
-    background: rgba(99,102,241,0.2);
+.mob-ham-label:active {
+    background: rgba(99,102,241,0.25);
+    transform: scale(0.93);
 }
 
-/* Overlay oscuro */
-#mobile-overlay {
+/* Overlay para cerrar */
+.mob-overlay-label {
     display: none;
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.7);
-    z-index: 99997;
-    backdrop-filter: blur(2px);
+    z-index: 999997;
+    background: rgba(0,0,0,0.72);
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
 }
 
 /* Drawer lateral */
-#mobile-drawer {
+.mob-drawer {
     display: none;
     position: fixed;
     top: 0;
-    left: -100%;
-    width: 280px;
-    height: 100%;
-    background: #09090F;
-    border-right: 1px solid rgba(99,102,241,0.2);
-    z-index: 99998;
-    overflow-y: auto;
-    transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 8px 0 40px rgba(0,0,0,0.6);
-}
-#mobile-drawer.open {
     left: 0;
+    width: 285px;
+    height: 100%;
+    height: 100dvh;
+    background: #09090F;
+    border-right: 1px solid rgba(99,102,241,0.22);
+    z-index: 999998;
+    overflow-y: auto;
+    overflow-x: hidden;
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+    box-shadow: 8px 0 40px rgba(0,0,0,0.7);
+    -webkit-overflow-scrolling: touch;
 }
 
-/* Header del drawer */
-.drawer-header {
+/* Activar todo cuando el checkbox está marcado */
+#mob-toggle:checked ~ .mob-ham-label {
+    background: rgba(99,102,241,0.2);
+    border-color: rgba(99,102,241,0.7);
+}
+#mob-toggle:checked ~ .mob-overlay-label {
+    display: block !important;
+}
+#mob-toggle:checked ~ .mob-drawer {
+    transform: translateX(0);
+}
+
+/* Solo mostrar en móvil */
+@media (max-width: 768px) {
+    .mob-ham-label { display: flex !important; }
+    .mob-drawer { display: block !important; }
+    .mob-overlay-label { display: block !important; visibility: hidden; }
+    #mob-toggle:checked ~ .mob-overlay-label { visibility: visible; }
+}
+
+/* Contenido del drawer */
+.drw-head {
     background: linear-gradient(145deg, #0D0F1A, #111320);
     border-bottom: 1px solid rgba(255,255,255,0.06);
-    padding: 24px 20px 20px;
+    padding: 20px 18px 16px;
     display: flex;
     align-items: center;
     justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 2;
 }
-.drawer-logo {
+.drw-logo {
     font-family: 'Syne', sans-serif;
     font-weight: 800;
-    font-size: 1.1rem;
+    font-size: 1.05rem;
     background: linear-gradient(135deg, #FFFFFF, #7C3AED);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
-.drawer-close {
+.drw-close-lbl {
     background: rgba(255,255,255,0.06);
     border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 8px;
-    width: 32px;
-    height: 32px;
+    border-radius: 9px;
+    width: 34px;
+    height: 34px;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     color: #94A3B8;
-    font-size: 1rem;
-    transition: all 0.2s;
+    font-size: 1.05rem;
+    -webkit-tap-highlight-color: transparent;
+    transition: background 0.2s;
 }
-.drawer-close:active { background: rgba(239,68,68,0.2); color: #F87171; }
+.drw-close-lbl:active { background: rgba(239,68,68,0.22); color: #F87171; }
 
-/* Info del usuario en drawer */
-.drawer-user {
-    padding: 16px 20px;
+.drw-user {
+    padding: 14px 18px;
     border-bottom: 1px solid rgba(255,255,255,0.05);
 }
-.drawer-user-name {
-    color: #F1F5F9;
-    font-weight: 700;
-    font-size: 0.9rem;
-    font-family: 'Syne', sans-serif;
-}
-.drawer-user-role {
-    color: #7C3AED;
-    font-size: 0.7rem;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    margin-top: 4px;
-}
+.drw-uname { color: #F1F5F9; font-weight: 700; font-size: 0.9rem; font-family: 'Syne', sans-serif; }
+.drw-urole { color: #7C3AED; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.12em; margin-top: 3px; }
 
-/* Modo badge en drawer */
-.drawer-modo {
-    margin: 12px 16px;
-    background: rgba(99,102,241,0.1);
-    border: 1px solid rgba(99,102,241,0.25);
+.drw-modo-box {
+    margin: 10px 14px 0;
+    background: rgba(99,102,241,0.09);
+    border: 1px solid rgba(99,102,241,0.22);
     border-radius: 10px;
-    padding: 10px 14px;
+    padding: 9px 13px;
 }
-.drawer-modo-label {
-    color: #6366F1;
-    font-size: 0.65rem;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    margin-bottom: 3px;
-}
-.drawer-modo-value {
-    color: #A5B4FC;
-    font-weight: 700;
-    font-size: 0.85rem;
-}
+.drw-modo-lbl { color: #6366F1; font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 2px; }
+.drw-modo-val { color: #A5B4FC; font-weight: 700; font-size: 0.83rem; }
 
-/* Items del menú en drawer */
-.drawer-menu {
-    padding: 8px 12px;
-}
-.drawer-menu-item {
+.drw-menu { padding: 10px 10px 20px; }
+.drw-item {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 13px 14px;
-    border-radius: 12px;
-    cursor: pointer;
-    transition: all 0.2s ease;
+    gap: 11px;
+    padding: 13px 13px;
+    border-radius: 11px;
     color: #94A3B8;
     font-weight: 600;
-    font-size: 0.9rem;
+    font-size: 0.88rem;
     border: 1px solid transparent;
     margin-bottom: 3px;
-    text-decoration: none;
+    cursor: pointer;
+    text-decoration: none !important;
     -webkit-tap-highlight-color: transparent;
+    transition: background 0.18s, border-color 0.18s, color 0.18s;
 }
-.drawer-menu-item:hover,
-.drawer-menu-item:active {
-    background: rgba(99,102,241,0.12);
-    border-color: rgba(99,102,241,0.2);
-    color: #C4B5FD;
-}
-.drawer-menu-item.active {
-    background: rgba(99,102,241,0.15);
-    border-color: rgba(99,102,241,0.3);
-    color: #A5B4FC;
-}
-.drawer-menu-item .item-icon {
-    font-size: 1.2rem;
-    width: 28px;
-    text-align: center;
-    flex-shrink: 0;
-}
-.drawer-divider {
-    height: 1px;
-    background: rgba(255,255,255,0.05);
-    margin: 8px 14px;
-}
-
-/* Mostrar hamburguesa solo en móvil */
-@media (max-width: 768px) {
-    #mobile-hamburger-btn { display: flex !important; }
-    #mobile-overlay { display: none; }
-    #mobile-drawer { display: block; }
-}
+.drw-item:hover, .drw-item:active { background: rgba(99,102,241,0.13); border-color: rgba(99,102,241,0.22); color: #C4B5FD; }
+.drw-item.drw-active { background: rgba(99,102,241,0.16); border-color: rgba(99,102,241,0.32); color: #A5B4FC; }
+.drw-item .ico { font-size: 1.2rem; width: 26px; text-align: center; flex-shrink: 0; }
+.drw-sep { height: 1px; background: rgba(255,255,255,0.05); margin: 7px 12px; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -569,7 +537,6 @@ HACKER_SVG = """
 </svg>
 """
 
-# ─── MENÚ ITEMS POR ROL ───
 MENU_ADMIN = ["📊  Dashboard", "🌐  Plataformas", "📱  Gestión", "👥  Clientes", "🔔  Alertas", "💰  Finanzas", "🗑️  Eliminar", "🔐  Usuarios", "🚪  Salir"]
 MENU_OPER  = ["📊  Dashboard", "🌐  Plataformas", "📱  Gestión", "👥  Clientes", "🔔  Alertas", "💰  Finanzas", "🗑️  Eliminar", "🔑  Mi Clave", "🚪  Salir"]
 
@@ -619,10 +586,10 @@ MENU_ITEMS = MENU_ADMIN if es_admin else MENU_OPER
 # ══════════════════════════════════════════
 try:
     qp = st.query_params
-    mobile_nav_param = qp.get("mnav", None)
-    if mobile_nav_param:
-        decoded = urllib.parse.unquote(mobile_nav_param)
-        if decoded == '__CAMBIAR_MODO__':
+    mnav = qp.get("mnav", None)
+    if mnav:
+        decoded = urllib.parse.unquote(mnav)
+        if decoded == '__MODO_NONE__':
             st.session_state['modo'] = None
             st.query_params.clear()
             st.rerun()
@@ -637,7 +604,7 @@ if 'mobile_menu' not in st.session_state:
     st.session_state['mobile_menu'] = "📊  Dashboard"
 
 # ══════════════════════════════════════════
-# SIDEBAR (desktop)
+# SIDEBAR DESKTOP
 # ══════════════════════════════════════════
 with st.sidebar:
     rango_label = "ADMINISTRADOR" if es_admin else "OPERADOR"
@@ -664,126 +631,68 @@ with st.sidebar:
     menu_sidebar = st.radio("", MENU_ITEMS, label_visibility="collapsed", key="sidebar_menu")
 
 # ══════════════════════════════════════════
-# DRAWER MÓVIL — HTML COMPLETO
+# DRAWER MÓVIL — CSS PURO (sin JS externo)
 # ══════════════════════════════════════════
-current_menu_mobile = st.session_state.get('mobile_menu', "📊  Dashboard")
-modo_actual = st.session_state.get('modo')
-rango_label_m = "ADMINISTRADOR" if es_admin else "OPERADOR"
-u_nom_m = st.session_state.get('u_nom', '').upper()
+cur_mob   = st.session_state.get('mobile_menu', "📊  Dashboard")
+modo_act  = st.session_state.get('modo')
+u_nom_up  = st.session_state.get('u_nom', '').upper()
+rol_lbl   = "ADMINISTRADOR" if es_admin else "OPERADOR"
 
-if modo_actual:
-    modo_badge_html = f"""
-    <div class="drawer-modo">
-        <div class="drawer-modo-label">Modo activo</div>
-        <div class="drawer-modo-value">{"👤 Perfiles" if modo_actual == "PERFILES" else "📧 Cuentas Completas"}</div>
-    </div>
-    """
-    cambiar_modo_item = f"""
-    <div class="drawer-menu-item" onclick="drawerNav('__CAMBIAR_MODO__')">
-        <span class="item-icon">⇄</span>
-        <span>Cambiar Modo</span>
-    </div>
-    <div class="drawer-divider"></div>
-    """
+# Badge de modo activo en drawer
+if modo_act:
+    modo_val  = "👤 Perfiles" if modo_act == "PERFILES" else "📧 Cuentas Completas"
+    modo_html = f"""<div class='drw-modo-box'>
+        <div class='drw-modo-lbl'>Modo activo</div>
+        <div class='drw-modo-val'>{modo_val}</div>
+    </div>"""
+    cambiar_modo_html = f"""
+    <a class='drw-item' href='?mnav={urllib.parse.quote("__MODO_NONE__")}' style='color:#A5B4FC;border-color:rgba(99,102,241,0.2);background:rgba(99,102,241,0.08);'>
+        <span class='ico'>⇄</span><span>Cambiar Modo</span>
+    </a>
+    <div class='drw-sep'></div>"""
 else:
-    modo_badge_html = ""
-    cambiar_modo_item = ""
+    modo_html = ""
+    cambiar_modo_html = ""
 
 # Construir items del menú
-menu_items_html = ""
+items_html = ""
 for item in MENU_ITEMS:
-    # Extraer icono y texto
-    parts = item.split("  ", 1)
-    icono = parts[0] if len(parts) > 0 else "•"
-    texto = parts[1] if len(parts) > 1 else item
-    active_cls = "active" if current_menu_mobile == item else ""
-    menu_items_html += f"""
-    <div class="drawer-menu-item {active_cls}" onclick="drawerNav('{item}')">
-        <span class="item-icon">{icono}</span>
-        <span>{texto}</span>
-    </div>
-    """
+    partes = item.split("  ", 1)
+    ico  = partes[0] if partes else "•"
+    txt  = partes[1] if len(partes) > 1 else item
+    act  = "drw-active" if cur_mob == item else ""
+    enc  = urllib.parse.quote(item)
+    items_html += f"""<a class='drw-item {act}' href='?mnav={enc}'>
+        <span class='ico'>{ico}</span><span>{txt}</span>
+    </a>\n"""
 
+# HTML completo del drawer (sin JS, solo CSS + checkbox)
 drawer_html = f"""
-<!-- BOTÓN HAMBURGUESA -->
-<button id="mobile-hamburger-btn" onclick="openDrawer()" aria-label="Menú">
-    ☰
-</button>
+<!-- Checkbox oculto que controla el drawer -->
+<input type="checkbox" id="mob-toggle">
 
-<!-- OVERLAY -->
-<div id="mobile-overlay" onclick="closeDrawer()"></div>
+<!-- Botón hamburguesa (label del checkbox) -->
+<label class="mob-ham-label" for="mob-toggle">☰</label>
 
-<!-- DRAWER LATERAL -->
-<div id="mobile-drawer">
-    <div class="drawer-header">
-        <span class="drawer-logo">▶ STREAMING VIP</span>
-        <div class="drawer-close" onclick="closeDrawer()">✕</div>
+<!-- Overlay para cerrar (label del checkbox = toggle off) -->
+<label class="mob-overlay-label" for="mob-toggle"></label>
+
+<!-- Drawer lateral -->
+<div class="mob-drawer">
+    <div class="drw-head">
+        <span class="drw-logo">▶ STREAMING VIP</span>
+        <label class="drw-close-lbl" for="mob-toggle">✕</label>
     </div>
-    
-    <div class="drawer-user">
-        <div class="drawer-user-name">👤 {u_nom_m}</div>
-        <div class="drawer-user-role">{rango_label_m}</div>
+    <div class="drw-user">
+        <div class="drw-uname">👤 {u_nom_up}</div>
+        <div class="drw-urole">{rol_lbl}</div>
     </div>
-    
-    {modo_badge_html}
-    
-    <div class="drawer-menu">
-        {cambiar_modo_item}
-        {menu_items_html}
+    {modo_html}
+    <div class="drw-menu">
+        {cambiar_modo_html}
+        {items_html}
     </div>
 </div>
-
-<script>
-(function() {{
-    function openDrawer() {{
-        var drawer = document.getElementById('mobile-drawer');
-        var overlay = document.getElementById('mobile-overlay');
-        if (drawer) {{
-            drawer.classList.add('open');
-            if (overlay) overlay.style.display = 'block';
-            document.body.style.overflow = 'hidden';
-        }}
-    }}
-    
-    function closeDrawer() {{
-        var drawer = document.getElementById('mobile-drawer');
-        var overlay = document.getElementById('mobile-overlay');
-        if (drawer) {{
-            drawer.classList.remove('open');
-            if (overlay) overlay.style.display = 'none';
-            document.body.style.overflow = '';
-        }}
-    }}
-    
-    function drawerNav(key) {{
-        closeDrawer();
-        setTimeout(function() {{
-            var params = new URLSearchParams(window.location.search);
-            params.set('mnav', encodeURIComponent(key));
-            var newUrl = window.location.pathname + '?' + params.toString();
-            window.location.href = newUrl;
-        }}, 250);
-    }}
-    
-    // Exponer funciones globalmente
-    window.openDrawer = openDrawer;
-    window.closeDrawer = closeDrawer;
-    window.drawerNav = drawerNav;
-    
-    // Swipe para cerrar drawer
-    var startX = 0;
-    document.addEventListener('touchstart', function(e) {{
-        startX = e.touches[0].clientX;
-    }}, {{passive: true}});
-    document.addEventListener('touchend', function(e) {{
-        var endX = e.changedTouches[0].clientX;
-        var drawer = document.getElementById('mobile-drawer');
-        if (drawer && drawer.classList.contains('open') && (startX - endX) > 80) {{
-            closeDrawer();
-        }}
-    }}, {{passive: true}});
-}})();
-</script>
 """
 
 st.markdown(drawer_html, unsafe_allow_html=True)
@@ -791,19 +700,13 @@ st.markdown(drawer_html, unsafe_allow_html=True)
 # ══════════════════════════════════════════
 # RESOLVER MENÚ ACTIVO
 # ══════════════════════════════════════════
-# Sincronizar: si el sidebar cambió, actualizar mobile_menu
-if menu_sidebar != st.session_state.get('_last_sidebar_val', menu_sidebar):
+# Sincronizar sidebar → mobile_menu
+if menu_sidebar != st.session_state.get('_last_sb', menu_sidebar):
     st.session_state['mobile_menu'] = menu_sidebar
-st.session_state['_last_sidebar_val'] = menu_sidebar
+st.session_state['_last_sb'] = menu_sidebar
 
-# El menú activo es sidebar en desktop, mobile_menu en móvil
-# Como no podemos detectar el viewport en Python, usamos mobile_menu
-# que se sincroniza con sidebar cuando este cambia
-menu = st.session_state.get('mobile_menu', menu_sidebar)
-# Si sidebar fue cambiado manualmente (diferente al mobile_menu), sincronizar
-if menu_sidebar != menu:
-    menu = menu_sidebar
-    st.session_state['mobile_menu'] = menu_sidebar
+menu = menu_sidebar  # sidebar siempre manda en desktop
+# En móvil, el query param ya actualizó mobile_menu y se sincronizó arriba
 
 # ══════════════════════════════════════════
 # SELECTOR DE MODO
@@ -1627,7 +1530,7 @@ elif "🗑️" in menu:
                     if st.button("🗑️", key=f"del_{row_e['email']}", use_container_width=True):
                         conn.cursor().execute("DELETE FROM perfiles WHERE email=?", (row_e['email'],))
                         conn.cursor().execute("DELETE FROM cuentas WHERE email=?", (row_e['email'],))
-                        conn.commit(); st.success(f"Eliminada."); st.rerun()
+                        conn.commit(); st.success("Eliminada."); st.rerun()
                     st.markdown("</div>", unsafe_allow_html=True)
 
             if del_plat != "TODAS":
@@ -1638,7 +1541,7 @@ elif "🗑️" in menu:
                     for em in emails_plat:
                         conn.cursor().execute("DELETE FROM perfiles WHERE email=?", (em,))
                         conn.cursor().execute("DELETE FROM cuentas WHERE email=?", (em,))
-                    conn.commit(); st.success(f"Todas eliminadas."); st.rerun()
+                    conn.commit(); st.success("Todas eliminadas."); st.rerun()
                 st.markdown("</div>", unsafe_allow_html=True)
         else:
             st.info("No hay cuentas para la selección actual.")
@@ -1670,7 +1573,7 @@ elif "🗑️" in menu:
                     st.markdown("<div class='btn-danger'>", unsafe_allow_html=True)
                     if st.button("🗑️", key=f"cdel_{row_e['id']}", use_container_width=True):
                         conn.cursor().execute("DELETE FROM cuentas_completas WHERE id=?", (int(row_e['id']),))
-                        conn.commit(); st.success(f"Eliminada."); st.rerun()
+                        conn.commit(); st.success("Eliminada."); st.rerun()
                     st.markdown("</div>", unsafe_allow_html=True)
 
             if del_plat != "TODAS":
@@ -1678,7 +1581,7 @@ elif "🗑️" in menu:
                 st.markdown("<div class='btn-danger'>", unsafe_allow_html=True)
                 if st.button(f"🗑️  ELIMINAR TODAS LAS CUENTAS DE {del_plat}", use_container_width=True):
                     conn.cursor().execute(f"DELETE FROM cuentas_completas WHERE plataforma='{del_plat}' AND creador_id={uid}")
-                    conn.commit(); st.success(f"Todas eliminadas."); st.rerun()
+                    conn.commit(); st.success("Todas eliminadas."); st.rerun()
                 st.markdown("</div>", unsafe_allow_html=True)
         else:
             st.info("No hay cuentas para la selección actual.")
