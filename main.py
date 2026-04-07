@@ -47,6 +47,11 @@ st.markdown("""
 
 * { font-family: 'DM Sans', sans-serif; }
 #MainMenu, footer, header { visibility: hidden; }
+[data-testid="stToolbar"] { visibility: hidden !important; }
+[data-testid="stDecoration"] { display: none !important; }
+.viewerBadge_container__1QSob, .styles_viewerBadge__1yB5_, [class*="viewerBadge"] { display: none !important; }
+button[kind="headerNoPadding"] { display: none !important; }
+[data-testid="stStatusWidget"] { display: none !important; }
 
 .stApp {
     background: #060810;
@@ -391,33 +396,21 @@ HACKER_SVG = """
       <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
     </filter>
   </defs>
-  <!-- Glow background -->
   <circle cx="60" cy="60" r="55" fill="url(#glow)"/>
-  <!-- Hood/body -->
   <ellipse cx="60" cy="105" rx="38" ry="22" fill="#0a1a10" stroke="#00FF8C" stroke-width="1.2" opacity="0.9"/>
-  <!-- Hoodie shape -->
   <path d="M22 95 Q30 65 42 58 Q50 54 60 54 Q70 54 78 58 Q90 65 98 95 Z" fill="#0d1f14" stroke="#00FF8C" stroke-width="1" opacity="0.95"/>
-  <!-- Hood -->
   <path d="M36 62 Q38 30 60 28 Q82 30 84 62 Q72 55 60 55 Q48 55 36 62 Z" fill="#0a1a0f" stroke="#00FF8C" stroke-width="1.2"/>
-  <!-- Face shadow -->
   <ellipse cx="60" cy="52" rx="17" ry="14" fill="#020804"/>
-  <!-- Eyes - glowing green -->
   <ellipse cx="52" cy="50" rx="4" ry="3" fill="#00FF8C" filter="url(#neon)" opacity="0.95"/>
   <ellipse cx="68" cy="50" rx="4" ry="3" fill="#00FF8C" filter="url(#neon)" opacity="0.95"/>
-  <!-- Eye pupils -->
   <ellipse cx="52" cy="50" rx="2" ry="2" fill="#003318"/>
   <ellipse cx="68" cy="50" rx="2" ry="2" fill="#003318"/>
-  <!-- Mask/lower face -->
   <rect x="44" y="54" width="32" height="10" rx="5" fill="#0a1a10" stroke="#00FF8C" stroke-width="0.8"/>
-  <!-- Mask lines -->
   <line x1="47" y1="57" x2="73" y2="57" stroke="#00FF8C" stroke-width="0.5" opacity="0.5"/>
   <line x1="47" y1="60" x2="73" y2="60" stroke="#00FF8C" stroke-width="0.5" opacity="0.5"/>
-  <!-- Laptop/device -->
   <rect x="32" y="88" width="56" height="6" rx="2" fill="#0d1f14" stroke="#00FF8C" stroke-width="0.8"/>
   <rect x="36" y="80" width="48" height="10" rx="2" fill="#040d06" stroke="#00FF8C" stroke-width="0.8"/>
-  <!-- Code on screen -->
   <text x="40" y="88" font-family="monospace" font-size="4" fill="#00FF8C" opacity="0.8">&gt;_ ACCESS</text>
-  <!-- Binary rain hints -->
   <text x="18" y="40" font-family="monospace" font-size="5" fill="#00FF8C" opacity="0.2">01</text>
   <text x="96" y="55" font-family="monospace" font-size="5" fill="#00FF8C" opacity="0.2">10</text>
   <text x="14" y="70" font-family="monospace" font-size="4" fill="#00D4FF" opacity="0.15">11</text>
@@ -490,7 +483,7 @@ with st.sidebar:
     if st.session_state['u_ran'] == 'ADMIN_GLOBAL':
         menu = st.radio("", ["📊  Dashboard", "🌐  Plataformas", "📱  Gestión", "👥  Clientes", "🔔  Alertas", "💰  Finanzas", "🗑️  Eliminar", "🔐  Usuarios", "🚪  Salir"], label_visibility="collapsed")
     else:
-        menu = st.radio("", ["📊  Dashboard", "🌐  Plataformas", "📱  Gestión", "👥  Clientes", "🔔  Alertas", "💰  Finanzas", "🔑  Mi Clave", "🚪  Salir"], label_visibility="collapsed")
+        menu = st.radio("", ["📊  Dashboard", "🌐  Plataformas", "📱  Gestión", "👥  Clientes", "🔔  Alertas", "💰  Finanzas", "🗑️  Eliminar", "🔑  Mi Clave", "🚪  Salir"], label_visibility="collapsed")
 
 # ══════════════════════════════════════════
 # SELECTOR DE MODO
@@ -741,7 +734,6 @@ elif "📱" in menu:
                 with st.expander(f"📧  {c['email']}"):
                     st.markdown(f"<div class='key-box'>🔑 &nbsp; {c['password']}</div>", unsafe_allow_html=True)
 
-                    # ── CAMBIAR CONTRASEÑA CUENTA MAESTRA ──
                     if st.session_state.get('edit_pass_email') == c['email']:
                         st.markdown("""<div style='background:rgba(251,191,36,0.06);border:1px solid rgba(251,191,36,0.2);
                             border-radius:12px;padding:16px;margin:8px 0 14px;'>
@@ -833,7 +825,6 @@ elif "📱" in menu:
                                             conn.cursor().execute(
                                                 "UPDATE perfiles SET estado='VENDIDO',whatsapp=?,fecha_vence=?,precio_venta=?,fecha_venta=? WHERE id=?",
                                                 (wa_input, vence, precio_v, datetime.now().strftime("%d/%m/%Y"), row['id']))
-                                            # Auto-registrar cliente si no existe
                                             try:
                                                 conn.cursor().execute(
                                                     "INSERT OR IGNORE INTO clientes (whatsapp, nombre, creador_id, fecha_registro) VALUES (?,?,?,?)",
@@ -924,7 +915,6 @@ elif "📱" in menu:
                     <div class='key-box'>🔑 &nbsp; {row['password']}</div>
                     """, unsafe_allow_html=True)
 
-                    # ── CAMBIAR CONTRASEÑA CUENTA COMPLETA ──
                     if st.session_state.get('edit_pass_cc_id') == row['id']:
                         st.markdown("""<div style='background:rgba(251,191,36,0.06);border:1px solid rgba(251,191,36,0.2);
                             border-radius:12px;padding:16px;margin:8px 0 14px;'>
@@ -1025,14 +1015,12 @@ elif "👥" in menu and "🔐" not in menu:
     st.markdown("<div class='glow-divider'></div>", unsafe_allow_html=True)
     modo = st.session_state.get('modo', 'PERFILES')
 
-    # Buscador principal
     st.markdown("""<div style='background:linear-gradient(145deg,#080C18,#0D1020);border:1px solid rgba(6,182,212,0.2);border-radius:18px;padding:22px 24px;margin-bottom:24px;'>
         <div style='color:#67E8F9;font-weight:700;font-size:0.85rem;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:14px;'>🔍 Buscador de Clientes</div>
     """, unsafe_allow_html=True)
     busqueda = st.text_input("Buscar por número de WhatsApp o nombre", placeholder="Ej: 51987654321 o Juan...", label_visibility="collapsed")
     st.markdown("</div>", unsafe_allow_html=True)
 
-    # Registrar nuevo cliente
     with st.expander("➕  Registrar nuevo cliente"):
         with st.form("nuevo_cliente"):
             rc1, rc2, rc3 = st.columns(3)
@@ -1051,7 +1039,6 @@ elif "👥" in menu and "🔐" not in menu:
 
     st.markdown("<div class='glow-divider'></div>", unsafe_allow_html=True)
 
-    # Obtener clientes según búsqueda
     if busqueda:
         clientes_df = pd.read_sql_query(
             f"SELECT * FROM clientes WHERE creador_id={uid} AND (whatsapp LIKE '%{busqueda}%' OR nombre LIKE '%{busqueda}%') ORDER BY nombre",
@@ -1070,7 +1057,6 @@ elif "👥" in menu and "🔐" not in menu:
     for _, cli in clientes_df.iterrows():
         wa = cli['whatsapp']
 
-        # Contar servicios activos
         if modo == 'PERFILES':
             servicios_activos = pd.read_sql_query(
                 f"SELECT COUNT(*) FROM perfiles WHERE whatsapp='{wa}' AND estado='VENDIDO' AND creador_id={uid}", conn).iloc[0,0]
@@ -1078,11 +1064,8 @@ elif "👥" in menu and "🔐" not in menu:
             servicios_activos = pd.read_sql_query(
                 f"SELECT COUNT(*) FROM cuentas_completas WHERE whatsapp='{wa}' AND estado='ENTREGADA' AND creador_id={uid}", conn).iloc[0,0]
 
-        color_badge = "#34D399" if servicios_activos > 0 else "#475569"
-
         with st.expander(f"🧑 {cli['nombre']}  ·  📱 {wa}  ·  {'🟢 ' + str(servicios_activos) + ' servicio(s) activo(s)' if servicios_activos > 0 else '⚫ Sin servicios activos'}"):
 
-            # Info y edición del cliente
             cc1, cc2, cc3 = st.columns([2, 2, 1])
             nuevo_nombre_cli = cc1.text_input("Nombre", value=cli['nombre'], key=f"cln_{cli['id']}")
             nuevo_wa_cli     = cc2.text_input("WhatsApp", value=wa, key=f"clw_{cli['id']}")
@@ -1105,7 +1088,6 @@ elif "👥" in menu and "🔐" not in menu:
 
             st.markdown("<div class='divider'></div>", unsafe_allow_html=True)
 
-            # Servicios asignados
             if modo == 'PERFILES':
                 servicios = pd.read_sql_query(
                     f"SELECT p.*, c.password as clave_maestra FROM perfiles p JOIN cuentas c ON p.email=c.email WHERE p.whatsapp='{wa}' AND p.creador_id={uid}",
@@ -1158,7 +1140,6 @@ elif "👥" in menu and "🔐" not in menu:
                 else:
                     st.markdown("<div style='color:#374151;text-align:center;padding:16px;font-size:0.88rem;'>Sin cuentas asignadas.</div>", unsafe_allow_html=True)
 
-            # Botón WhatsApp contacto
             msg_cli = f"Hola {cli['nombre']}! 👋 Te escribimos desde *STREAMING VIP*."
             wa_link_cli = f"https://wa.me/{wa}?text={urllib.parse.quote(msg_cli)}"
             st.markdown(f"""<a href="{wa_link_cli}" target="_blank" style="text-decoration:none;display:inline-block;margin-top:8px;">
@@ -1231,7 +1212,6 @@ elif "💰" in menu:
     st.markdown("<div class='glow-divider'></div>", unsafe_allow_html=True)
     modo = st.session_state.get('modo', 'PERFILES')
 
-    # ── FILTROS ──
     st.markdown("""<div style='background:linear-gradient(145deg,#0A0C18,#0D1020);border:1px solid rgba(99,102,241,0.15);border-radius:18px;padding:22px 24px;margin-bottom:24px;'>
         <div style='color:#A5B4FC;font-weight:700;font-size:0.85rem;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:16px;'>🎛️ Filtros de Análisis</div>
     """, unsafe_allow_html=True)
@@ -1241,7 +1221,6 @@ elif "💰" in menu:
     fecha_modo  = fc2.selectbox("📅 Periodo", ["Todo el tiempo", "Hoy", "Últimos 7 días", "Últimos 30 días", "Rango personalizado"], key="fin_fmode")
     st.markdown("</div>", unsafe_allow_html=True)
 
-    # Rango personalizado
     fecha_desde = None
     fecha_hasta = None
     if fecha_modo == "Rango personalizado":
@@ -1258,7 +1237,6 @@ elif "💰" in menu:
         fecha_desde = (datetime.now() - timedelta(days=30)).date()
         fecha_hasta = datetime.now().date()
 
-    # Construir filtro SQL de fecha
     def build_date_filter(col="fecha_venta"):
         if fecha_desde and fecha_hasta:
             desde_str = fecha_desde.strftime("%d/%m/%Y")
@@ -1271,7 +1249,6 @@ elif "💰" in menu:
             return f" AND {col}='{plat_filter}'"
         return ""
 
-    # ── MÉTRICAS GLOBALES ──
     if modo == 'PERFILES':
         q_base = f"FROM perfiles WHERE estado='VENDIDO' AND creador_id={uid}{build_date_filter()}{build_plat_filter()}"
         ingresos = pd.read_sql_query(f"SELECT COALESCE(SUM(precio_venta),0) {q_base}", conn).iloc[0,0]
@@ -1289,7 +1266,6 @@ elif "💰" in menu:
     margen = (ganancia / ingresos * 100) if ingresos > 0 else 0
     ticket_prom = (ingresos / total_v) if total_v > 0 else 0
 
-    # Periodo label
     if fecha_modo == "Rango personalizado" and fecha_desde and fecha_hasta:
         periodo_label = f"{fecha_desde.strftime('%d/%m/%Y')} → {fecha_hasta.strftime('%d/%m/%Y')}"
     elif fecha_modo != "Todo el tiempo":
@@ -1306,7 +1282,6 @@ elif "💰" in menu:
     c4.metric("📈 Margen", f"{margen:.1f}%")
     c5.metric("🛒 Ventas", str(total_v))
 
-    # Ticket promedio
     st.markdown(f"""<div style='background:linear-gradient(145deg,#0D0F1A,#111320);border:1px solid rgba(99,102,241,0.12);border-radius:14px;padding:16px 20px;margin:16px 0;display:flex;align-items:center;gap:16px;'>
         <div style='font-size:1.6rem;'>🎟️</div>
         <div>
@@ -1319,7 +1294,6 @@ elif "💰" in menu:
     st.markdown("### Detalle por plataforma")
 
     for plat, info in PLATAFORMAS.items():
-        # Saltar si hay filtro de plataforma específico y no coincide
         if plat_filter != "TODAS" and plat != plat_filter:
             continue
         if modo == 'PERFILES':
@@ -1349,52 +1323,9 @@ elif "💰" in menu:
             </div>""", unsafe_allow_html=True)
 
 # ══════════════════════════════════════════
-# USUARIOS (solo ADMIN)
+# ELIMINAR — disponible para TODOS los rangos
 # ══════════════════════════════════════════
-elif "🔐" in menu and st.session_state['u_ran'] == 'ADMIN_GLOBAL':
-    st.markdown("<div class='title-main'>USUARIOS</div>", unsafe_allow_html=True)
-    st.markdown("<div class='subtitle'>Administrar accesos al sistema</div>", unsafe_allow_html=True)
-    st.markdown("<div class='glow-divider'></div>", unsafe_allow_html=True)
-
-    with st.form("nuevo_user"):
-        c1, c2, c3 = st.columns(3)
-        nu = c1.text_input("USUARIO")
-        np_ = c2.text_input("CONTRASEÑA", type="password")
-        nr = c3.selectbox("ROL", ["OPERADOR", "ADMIN_GLOBAL"])
-        if st.form_submit_button("➕  CREAR USUARIO", use_container_width=True):
-            if nu and np_:
-                try:
-                    conn.cursor().execute("INSERT INTO usuarios (user, password, rango) VALUES (?,?,?)", (nu, hash_pass(np_), nr))
-                    conn.commit(); st.success(f"✅ Usuario {nu} creado.")
-                except: st.error("El usuario ya existe.")
-
-    st.markdown("<div class='glow-divider'></div>", unsafe_allow_html=True)
-    users = pd.read_sql_query("SELECT id, user, rango FROM usuarios", conn)
-    for _, row in users.iterrows():
-        icono = "👑" if row['rango'] == 'ADMIN_GLOBAL' else "👤"
-        u_col1, u_col2 = st.columns([4, 1])
-        with u_col1:
-            st.markdown(f"""<div class='card'>
-                <div style='display:flex;align-items:center;gap:14px;'>
-                    <span style='font-size:1.4rem;'>{icono}</span>
-                    <div style='flex:1;'>
-                        <div style='color:#F1F5F9;font-weight:700;font-family:Syne,sans-serif;'>{row["user"]}</div>
-                        <div style='color:#475569;font-size:0.78rem;margin-top:2px;'>{row["rango"]}</div>
-                    </div>
-                </div>
-            </div>""", unsafe_allow_html=True)
-        with u_col2:
-            if row['user'] != 'admin':
-                st.markdown("<div class='btn-danger'>", unsafe_allow_html=True)
-                if st.button("🗑️", key=f"del_u_{row['id']}", use_container_width=True):
-                    conn.cursor().execute("DELETE FROM usuarios WHERE id=?", (row['id'],))
-                    conn.commit(); st.rerun()
-                st.markdown("</div>", unsafe_allow_html=True)
-
-# ══════════════════════════════════════════
-# ELIMINAR (solo ADMIN)
-# ══════════════════════════════════════════
-elif "🗑️" in menu and st.session_state['u_ran'] == 'ADMIN_GLOBAL':
+elif "🗑️" in menu:
     st.markdown("<div class='title-main'>ELIMINAR DATOS</div>", unsafe_allow_html=True)
     st.markdown("""<div style='background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:14px;padding:16px 20px;margin-bottom:24px;'>
         <span style='color:#F87171;font-weight:700;'>⚠️ Zona peligrosa</span>
@@ -1406,7 +1337,6 @@ elif "🗑️" in menu and st.session_state['u_ran'] == 'ADMIN_GLOBAL':
     if modo == 'PERFILES':
         st.markdown("### Eliminar por Plataforma")
 
-        # Selector de plataforma para filtrar
         del_plat = st.selectbox("🎬 Filtrar por plataforma", ["TODAS"] + list(PLATAFORMAS.keys()), key="del_plat_filter")
 
         if del_plat == "TODAS":
@@ -1415,7 +1345,6 @@ elif "🗑️" in menu and st.session_state['u_ran'] == 'ADMIN_GLOBAL':
             ctas_e = pd.read_sql_query(f"SELECT email, plataforma FROM cuentas WHERE creador_id={uid} AND plataforma='{del_plat}' ORDER BY email", conn)
 
         if not ctas_e.empty:
-            # Mostrar cuentas de la plataforma seleccionada
             st.markdown(f"<div style='color:#475569;font-size:0.82rem;margin-bottom:12px;'>{len(ctas_e)} cuenta(s) encontrada(s)</div>", unsafe_allow_html=True)
 
             for _, row_e in ctas_e.iterrows():
@@ -1440,7 +1369,6 @@ elif "🗑️" in menu and st.session_state['u_ran'] == 'ADMIN_GLOBAL':
                         conn.commit(); st.success(f"Cuenta {row_e['email']} eliminada."); st.rerun()
                     st.markdown("</div>", unsafe_allow_html=True)
 
-            # Botón eliminar todas las de la plataforma
             if del_plat != "TODAS":
                 st.markdown("<div class='glow-divider'></div>", unsafe_allow_html=True)
                 st.markdown(f"<div style='color:#F87171;font-weight:700;margin-bottom:8px;'>⚠️ Eliminar TODAS las cuentas de {del_plat}</div>", unsafe_allow_html=True)
@@ -1501,6 +1429,49 @@ elif "🗑️" in menu and st.session_state['u_ran'] == 'ADMIN_GLOBAL':
                 st.markdown("</div>", unsafe_allow_html=True)
         else:
             st.info("No hay cuentas para la selección actual.")
+
+# ══════════════════════════════════════════
+# USUARIOS (solo ADMIN_GLOBAL)
+# ══════════════════════════════════════════
+elif "🔐" in menu and st.session_state['u_ran'] == 'ADMIN_GLOBAL':
+    st.markdown("<div class='title-main'>USUARIOS</div>", unsafe_allow_html=True)
+    st.markdown("<div class='subtitle'>Administrar accesos al sistema</div>", unsafe_allow_html=True)
+    st.markdown("<div class='glow-divider'></div>", unsafe_allow_html=True)
+
+    with st.form("nuevo_user"):
+        c1, c2, c3 = st.columns(3)
+        nu = c1.text_input("USUARIO")
+        np_ = c2.text_input("CONTRASEÑA", type="password")
+        nr = c3.selectbox("ROL", ["OPERADOR", "ADMIN_GLOBAL"])
+        if st.form_submit_button("➕  CREAR USUARIO", use_container_width=True):
+            if nu and np_:
+                try:
+                    conn.cursor().execute("INSERT INTO usuarios (user, password, rango) VALUES (?,?,?)", (nu, hash_pass(np_), nr))
+                    conn.commit(); st.success(f"✅ Usuario {nu} creado.")
+                except: st.error("El usuario ya existe.")
+
+    st.markdown("<div class='glow-divider'></div>", unsafe_allow_html=True)
+    users = pd.read_sql_query("SELECT id, user, rango FROM usuarios", conn)
+    for _, row in users.iterrows():
+        icono = "👑" if row['rango'] == 'ADMIN_GLOBAL' else "👤"
+        u_col1, u_col2 = st.columns([4, 1])
+        with u_col1:
+            st.markdown(f"""<div class='card'>
+                <div style='display:flex;align-items:center;gap:14px;'>
+                    <span style='font-size:1.4rem;'>{icono}</span>
+                    <div style='flex:1;'>
+                        <div style='color:#F1F5F9;font-weight:700;font-family:Syne,sans-serif;'>{row["user"]}</div>
+                        <div style='color:#475569;font-size:0.78rem;margin-top:2px;'>{row["rango"]}</div>
+                    </div>
+                </div>
+            </div>""", unsafe_allow_html=True)
+        with u_col2:
+            if row['user'] != 'admin':
+                st.markdown("<div class='btn-danger'>", unsafe_allow_html=True)
+                if st.button("🗑️", key=f"del_u_{row['id']}", use_container_width=True):
+                    conn.cursor().execute("DELETE FROM usuarios WHERE id=?", (row['id'],))
+                    conn.commit(); st.rerun()
+                st.markdown("</div>", unsafe_allow_html=True)
 
 # ══════════════════════════════════════════
 # CAMBIAR CLAVE
