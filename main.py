@@ -426,7 +426,7 @@ HACKER_SVG = """
 """
 
 # --- SESSION STATE ---
-for k, v in [('auth', False), ('modo', None), ('p_sel', 'NETFLIX'), ('edit_perfil_id', None), ('cliente_buscado', None)]:
+for k, v in [('auth', False), ('modo', None), ('p_sel', 'NETFLIX'), ('edit_perfil_id', None), ('cliente_buscado', None), ('edit_pass_email', None), ('edit_pass_cc_id', None)]:
     if k not in st.session_state: st.session_state[k] = v
 
 conn = get_db()
@@ -741,6 +741,37 @@ elif "📱" in menu:
                 with st.expander(f"📧  {c['email']}"):
                     st.markdown(f"<div class='key-box'>🔑 &nbsp; {c['password']}</div>", unsafe_allow_html=True)
 
+                    # ── CAMBIAR CONTRASEÑA CUENTA MAESTRA ──
+                    if st.session_state.get('edit_pass_email') == c['email']:
+                        st.markdown("""<div style='background:rgba(251,191,36,0.06);border:1px solid rgba(251,191,36,0.2);
+                            border-radius:12px;padding:16px;margin:8px 0 14px;'>
+                            <div style='color:#FCD34D;font-size:0.8rem;font-weight:700;letter-spacing:0.08em;margin-bottom:12px;'>🔐 CAMBIAR CONTRASEÑA DE LA CUENTA</div>
+                        """, unsafe_allow_html=True)
+                        ep1, ep2, ep3 = st.columns([3, 1, 1])
+                        nueva_pass_m = ep1.text_input("Nueva contraseña", placeholder="Ingresa la nueva contraseña...", key=f"npass_{c['email']}", label_visibility="collapsed")
+                        with ep2:
+                            st.markdown("<div class='btn-edit'>", unsafe_allow_html=True)
+                            if st.button("💾 GUARDAR", key=f"savepass_{c['email']}", use_container_width=True):
+                                if nueva_pass_m:
+                                    conn.cursor().execute("UPDATE cuentas SET password=? WHERE email=?", (nueva_pass_m, c['email']))
+                                    conn.commit()
+                                    st.session_state['edit_pass_email'] = None
+                                    st.success("✅ Contraseña actualizada.")
+                                    st.rerun()
+                                else: st.warning("Ingresa la nueva contraseña.")
+                            st.markdown("</div>", unsafe_allow_html=True)
+                        with ep3:
+                            if st.button("✖ CANCELAR", key=f"cancelpass_{c['email']}", use_container_width=True):
+                                st.session_state['edit_pass_email'] = None; st.rerun()
+                        st.markdown("</div>", unsafe_allow_html=True)
+                    else:
+                        st.markdown("<div class='btn-edit'>", unsafe_allow_html=True)
+                        if st.button("🔐 Cambiar contraseña", key=f"chpass_{c['email']}", use_container_width=True):
+                            st.session_state['edit_pass_email'] = c['email']; st.rerun()
+                        st.markdown("</div>", unsafe_allow_html=True)
+
+                    st.markdown("<div style='margin:8px 0;'></div>", unsafe_allow_html=True)
+
                     with st.expander("➕  Agregar nuevo perfil"):
                         np_c1, np_c2, np_c3 = st.columns(3)
                         nuevo_nombre = np_c1.text_input("Nombre del perfil", key=f"nn_{c['email']}")
@@ -892,6 +923,37 @@ elif "📱" in menu:
                     <div class='key-box'>📧 &nbsp; {row['email']}</div>
                     <div class='key-box'>🔑 &nbsp; {row['password']}</div>
                     """, unsafe_allow_html=True)
+
+                    # ── CAMBIAR CONTRASEÑA CUENTA COMPLETA ──
+                    if st.session_state.get('edit_pass_cc_id') == row['id']:
+                        st.markdown("""<div style='background:rgba(251,191,36,0.06);border:1px solid rgba(251,191,36,0.2);
+                            border-radius:12px;padding:16px;margin:8px 0 14px;'>
+                            <div style='color:#FCD34D;font-size:0.8rem;font-weight:700;letter-spacing:0.08em;margin-bottom:12px;'>🔐 CAMBIAR CONTRASEÑA DE LA CUENTA</div>
+                        """, unsafe_allow_html=True)
+                        cp1, cp2, cp3 = st.columns([3, 1, 1])
+                        nueva_pass_c = cp1.text_input("Nueva contraseña", placeholder="Ingresa la nueva contraseña...", key=f"npassc_{row['id']}", label_visibility="collapsed")
+                        with cp2:
+                            st.markdown("<div class='btn-edit'>", unsafe_allow_html=True)
+                            if st.button("💾 GUARDAR", key=f"savepassc_{row['id']}", use_container_width=True):
+                                if nueva_pass_c:
+                                    conn.cursor().execute("UPDATE cuentas_completas SET password=? WHERE id=?", (nueva_pass_c, row['id']))
+                                    conn.commit()
+                                    st.session_state['edit_pass_cc_id'] = None
+                                    st.success("✅ Contraseña actualizada.")
+                                    st.rerun()
+                                else: st.warning("Ingresa la nueva contraseña.")
+                            st.markdown("</div>", unsafe_allow_html=True)
+                        with cp3:
+                            if st.button("✖ CANCELAR", key=f"cancelpassc_{row['id']}", use_container_width=True):
+                                st.session_state['edit_pass_cc_id'] = None; st.rerun()
+                        st.markdown("</div>", unsafe_allow_html=True)
+                    else:
+                        st.markdown("<div class='btn-edit'>", unsafe_allow_html=True)
+                        if st.button("🔐 Cambiar contraseña", key=f"chpassc_{row['id']}", use_container_width=True):
+                            st.session_state['edit_pass_cc_id'] = row['id']; st.rerun()
+                        st.markdown("</div>", unsafe_allow_html=True)
+
+                    st.markdown("<div style='margin:8px 0;'></div>", unsafe_allow_html=True)
 
                     if row['estado'] == 'DISPONIBLE':
                         g1, g2 = st.columns(2)
