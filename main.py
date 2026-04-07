@@ -3,9 +3,11 @@ import sqlite3
 import hashlib
 import pandas as pd
 from datetime import datetime, timedelta
+import urllib.parse
 
 # ---------------- CONFIG ----------------
 st.set_page_config(page_title="STREAMING PRO MAX", layout="wide")
+
 DB = "streaming.db"
 
 def db():
@@ -14,15 +16,14 @@ def db():
 def hash_pass(p):
     return hashlib.sha256(p.encode()).hexdigest()
 
-# ---------------- DB ----------------
 conn = db()
 c = conn.cursor()
 
+# ---------------- DB ----------------
 c.execute('''CREATE TABLE IF NOT EXISTS usuarios (
 id INTEGER PRIMARY KEY,
 user TEXT UNIQUE,
-password TEXT,
-rango TEXT DEFAULT 'USER'
+password TEXT
 )''')
 
 c.execute('''CREATE TABLE IF NOT EXISTS cuentas (
@@ -30,8 +31,8 @@ id INTEGER PRIMARY KEY,
 plataforma TEXT,
 email TEXT,
 password TEXT,
-vencimiento TEXT,
-precio REAL
+precio REAL,
+estado TEXT DEFAULT 'LIBRE'
 )''')
 
 c.execute('''CREATE TABLE IF NOT EXISTS clientes (
@@ -42,52 +43,55 @@ whatsapp TEXT
 
 conn.commit()
 
-# ADMIN
-c.execute("SELECT * FROM usuarios WHERE user='admin'")
-if not c.fetchone():
-    c.execute("INSERT INTO usuarios (user,password,rango) VALUES (?,?,?)",
-              ("admin", hash_pass("admin123"), "ADMIN"))
-    conn.commit()
-
-# ---------------- CSS PRO ----------------
+# ---------------- CSS PRO MAX ----------------
 st.markdown("""
 <style>
 .stApp {
-    background: linear-gradient(135deg,#020617,#0f172a);
-    color: white;
+    background: linear-gradient(135deg,#020617,#020617,#0f172a);
 }
 
 /* TITULO */
 .title {
     text-align:center;
-    font-size:38px;
+    font-size:42px;
     font-weight:900;
     background: linear-gradient(90deg,#00f5ff,#00ff85);
     -webkit-background-clip:text;
     -webkit-text-fill-color:transparent;
 }
 
-/* BOTONES GRANDES */
-.btn-grid button {
-    height:120px;
-    width:100%;
-    border-radius:16px;
-    font-size:16px;
-    font-weight:600;
+/* GRID CARDS */
+.card {
     background: #111827;
-    border:1px solid rgba(255,255,255,0.1);
-    transition:0.3s;
+    border-radius: 18px;
+    padding: 30px;
+    text-align: center;
+    height: 180px;
+    border: 1px solid rgba(255,255,255,0.08);
+    transition: 0.3s;
 }
-.btn-grid button:hover {
-    transform:scale(1.05);
-    box-shadow:0 0 20px #00ffff;
+.card:hover {
+    transform: scale(1.07);
+    box-shadow: 0 0 25px #00ffff;
 }
 
-/* LOGIN */
-.login {
-    background: rgba(255,255,255,0.05);
-    padding:35px;
-    border-radius:20px;
+/* ICON */
+.icon {
+    font-size:40px;
+    margin-bottom:10px;
+}
+
+/* BUTTON FULL */
+div.stButton > button {
+    width:100%;
+    height:180px;
+    opacity:0;
+    position:absolute;
+}
+
+/* CONTAINER RELATIVE */
+.btn-wrap {
+    position:relative;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -106,167 +110,119 @@ if not st.session_state.auth:
     col1, col2, col3 = st.columns([1,1.2,1])
 
     with col2:
-        st.markdown("<div class='login'>", unsafe_allow_html=True)
         st.markdown("<div class='title'>STREAMING PRO</div>", unsafe_allow_html=True)
 
-        tab1, tab2 = st.tabs(["LOGIN", "REGISTRO"])
+        u = st.text_input("Usuario")
+        p = st.text_input("Contraseña", type="password")
 
-        with tab1:
-            u = st.text_input("Usuario")
-            p = st.text_input("Contraseña", type="password")
-
-            if st.button("Ingresar"):
-                c.execute("SELECT id,password FROM usuarios WHERE user=?", (u,))
-                res = c.fetchone()
-                if res and res[1] == hash_pass(p):
-                    st.session_state.auth = True
-                    st.session_state.uid = res[0]
-                    st.session_state.step = "modo"
-                    st.rerun()
-                else:
-                    st.error("Datos incorrectos")
-
-        with tab2:
-            nu = st.text_input("Nuevo usuario")
-            np = st.text_input("Nueva contraseña", type="password")
-            if st.button("Registrar"):
-                try:
-                    c.execute("INSERT INTO usuarios (user,password) VALUES (?,?)",
-                              (nu, hash_pass(np)))
-                    conn.commit()
-                    st.success("Registrado")
-                except:
-                    st.error("Usuario existe")
-
-        st.markdown("</div>", unsafe_allow_html=True)
+        if st.button("INGRESAR"):
+            c.execute("SELECT * FROM usuarios WHERE user=?", (u,))
+            r = c.fetchone()
+            if r and r[2] == hash_pass(p):
+                st.session_state.auth = True
+                st.session_state.step = "panel"
+                st.rerun()
+            else:
+                st.error("Error login")
 
     st.stop()
 
-# ---------------- PASO 1 ----------------
-if st.session_state.step == "modo":
-    st.markdown("<div class='title'>SELECCIONA MODO</div>", unsafe_allow_html=True)
-
-    c1, c2 = st.columns(2)
-
-    with c1:
-        st.markdown('<div class="btn-grid">', unsafe_allow_html=True)
-        if st.button("📱 ADMINISTRAR POR PERFILES"):
-            st.session_state.tipo = "PERFILES"
-            st.session_state.step = "rol"
-            st.rerun()
-        st.markdown('</div>', unsafe_allow_html=True)
-
-    with c2:
-        st.markdown('<div class="btn-grid">', unsafe_allow_html=True)
-        if st.button("📧 CUENTAS COMPLETAS"):
-            st.session_state.tipo = "CUENTAS"
-            st.session_state.step = "rol"
-            st.rerun()
-        st.markdown('</div>', unsafe_allow_html=True)
-
-# ---------------- PASO 2 ----------------
-elif st.session_state.step == "rol":
-    st.markdown("<div class='title'>TIPO DE USUARIO</div>", unsafe_allow_html=True)
-
-    c1, c2 = st.columns(2)
-
-    with c1:
-        st.markdown('<div class="btn-grid">', unsafe_allow_html=True)
-        if st.button("👤 CLIENTE FINAL"):
-            st.session_state.step = "panel"
-            st.rerun()
-        st.markdown('</div>', unsafe_allow_html=True)
-
-    with c2:
-        st.markdown('<div class="btn-grid">', unsafe_allow_html=True)
-        if st.button("💼 COMISIONISTA"):
-            st.session_state.step = "panel"
-            st.rerun()
-        st.markdown('</div>', unsafe_allow_html=True)
-
 # ---------------- PANEL ----------------
-elif st.session_state.step == "panel":
+st.markdown("<div class='title'>PANEL PREMIUM</div>", unsafe_allow_html=True)
 
-    st.markdown(f"<div class='title'>PANEL {st.session_state.tipo}</div>", unsafe_allow_html=True)
+menu = [
+    ("➕","SUBIR"),
+    ("⚙️","ADMIN"),
+    ("👥","CLIENTES"),
+    ("💸","VENDER"),
+    ("📦","CUENTAS"),
+    ("🔔","NOTIF"),
+    ("💰","FINANZAS"),
+    ("👤","USUARIOS"),
+    ("👑","MI CUENTA")
+]
 
-    opciones = [
-        "➕ SUBIR CUENTAS",
-        "⚙️ ADMINISTRAR",
-        "👥 CLIENTES",
-        "💸 VENDER",
-        "📦 CUENTAS",
-        "🔔 NOTIFICACIONES",
-        "💰 FINANZAS",
-        "👨‍💻 USUARIOS",
-        "👤 MI CUENTA"
-    ]
+cols = st.columns(3)
 
-    cols = st.columns(3)
+for i,(icon,name) in enumerate(menu):
+    with cols[i%3]:
+        st.markdown("<div class='btn-wrap'>", unsafe_allow_html=True)
+        st.markdown(f"""
+        <div class='card'>
+            <div class='icon'>{icon}</div>
+            <h3>{name}</h3>
+        </div>
+        """, unsafe_allow_html=True)
 
-    for i, op in enumerate(opciones):
-        with cols[i % 3]:
-            st.markdown('<div class="btn-grid">', unsafe_allow_html=True)
-            if st.button(op):
-                st.session_state.modulo = op
-            st.markdown('</div>', unsafe_allow_html=True)
+        if st.button(name, key=name):
+            st.session_state.modulo = name
 
-    st.write("---")
+        st.markdown("</div>", unsafe_allow_html=True)
 
-    # ---------------- FUNCIONALIDAD ----------------
+st.write("---")
 
-    if st.session_state.modulo == "➕ SUBIR CUENTAS":
-        st.subheader("Subir cuentas")
+# ---------------- FUNCIONES ----------------
 
-        with st.form("subir"):
-            plat = st.selectbox("Plataforma", ["NETFLIX","DISNEY","PRIME"])
-            email = st.text_input("Correo")
-            password = st.text_input("Contraseña")
-            precio = st.number_input("Precio")
-            fecha = st.date_input("Vencimiento")
+# SUBIR
+if st.session_state.modulo == "SUBIR":
+    st.subheader("Subir cuentas")
 
-            if st.form_submit_button("Guardar"):
-                c.execute("INSERT INTO cuentas (plataforma,email,password,vencimiento,precio) VALUES (?,?,?,?,?)",
-                          (plat,email,password,str(fecha),precio))
-                conn.commit()
-                st.success("Cuenta guardada")
+    with st.form("subir"):
+        plat = st.selectbox("Plataforma", ["NETFLIX","DISNEY","PRIME"])
+        email = st.text_input("Correo")
+        password = st.text_input("Contraseña")
+        precio = st.number_input("Precio")
 
-    elif st.session_state.modulo == "⚙️ ADMINISTRAR":
-        st.subheader("Administrar")
-        df = pd.read_sql("SELECT * FROM cuentas", conn)
-        st.dataframe(df)
-
-    elif st.session_state.modulo == "👥 CLIENTES":
-        st.subheader("Clientes")
-        bus = st.text_input("Buscar WhatsApp")
-        df = pd.read_sql("SELECT * FROM clientes", conn)
-        st.dataframe(df)
-
-    elif st.session_state.modulo == "💸 VENDER":
-        st.subheader("Ventas (próximo nivel)")
-
-    elif st.session_state.modulo == "📦 CUENTAS":
-        st.subheader("Cuentas disponibles")
-        df = pd.read_sql("SELECT plataforma, COUNT(*) as total FROM cuentas GROUP BY plataforma", conn)
-        st.dataframe(df)
-
-    elif st.session_state.modulo == "🔔 NOTIFICACIONES":
-        st.subheader("Notificaciones")
-
-    elif st.session_state.modulo == "💰 FINANZAS":
-        st.subheader("Finanzas")
-        total = pd.read_sql("SELECT SUM(precio) FROM cuentas", conn).iloc[0,0]
-        st.metric("Ingresos", f"S/ {total or 0}")
-
-    elif st.session_state.modulo == "👨‍💻 USUARIOS":
-        st.subheader("Usuarios")
-        df = pd.read_sql("SELECT user,rango FROM usuarios", conn)
-        st.dataframe(df)
-
-    elif st.session_state.modulo == "👤 MI CUENTA":
-        st.subheader("Mi cuenta")
-        newp = st.text_input("Nueva contraseña", type="password")
-        if st.button("Actualizar"):
-            c.execute("UPDATE usuarios SET password=? WHERE id=?",
-                      (hash_pass(newp), st.session_state.uid))
+        if st.form_submit_button("Guardar"):
+            c.execute("INSERT INTO cuentas (plataforma,email,password,precio) VALUES (?,?,?,?)",
+                      (plat,email,password,precio))
             conn.commit()
-            st.success("Actualizado")
+            st.success("Guardado")
+
+# CLIENTES
+elif st.session_state.modulo == "CLIENTES":
+    st.subheader("Clientes")
+
+    nombre = st.text_input("Nombre")
+    numero = st.text_input("WhatsApp")
+
+    if st.button("Guardar cliente"):
+        c.execute("INSERT INTO clientes (nombre,whatsapp) VALUES (?,?)",(nombre,numero))
+        conn.commit()
+
+    df = pd.read_sql("SELECT * FROM clientes", conn)
+    st.dataframe(df)
+
+# VENDER (YA FUNCIONA 🔥)
+elif st.session_state.modulo == "VENDER":
+    st.subheader("Vender cuenta")
+
+    cuentas = pd.read_sql("SELECT * FROM cuentas WHERE estado='LIBRE'", conn)
+
+    if cuentas.empty:
+        st.warning("No hay cuentas disponibles")
+    else:
+        cuenta = st.selectbox("Seleccionar cuenta", cuentas["email"])
+
+        cliente = st.text_input("WhatsApp cliente")
+        precio = st.number_input("Precio venta")
+
+        if st.button("VENDER AHORA"):
+            c.execute("UPDATE cuentas SET estado='OCUPADO' WHERE email=?", (cuenta,))
+            conn.commit()
+
+            mensaje = f"Cuenta: {cuenta}"
+            url = f"https://wa.me/{cliente}?text={urllib.parse.quote(mensaje)}"
+
+            st.success("Venta realizada")
+            st.markdown(f"[Enviar WhatsApp]({url})")
+
+# CUENTAS
+elif st.session_state.modulo == "CUENTAS":
+    df = pd.read_sql("SELECT plataforma,estado,COUNT(*) as total FROM cuentas GROUP BY plataforma,estado", conn)
+    st.dataframe(df)
+
+# FINANZAS
+elif st.session_state.modulo == "FINANZAS":
+    total = pd.read_sql("SELECT SUM(precio) FROM cuentas", conn).iloc[0,0]
+    st.metric("Ingresos", total or 0)
