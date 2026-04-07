@@ -4,11 +4,8 @@ import hashlib
 import pandas as pd
 from datetime import datetime, timedelta
 
-# ---------------------------------
-# CONFIG
-# ---------------------------------
+# ---------------- CONFIG ----------------
 st.set_page_config(page_title="STREAMING PRO MAX", layout="wide")
-
 DB = "streaming.db"
 
 def db():
@@ -17,9 +14,7 @@ def db():
 def hash_pass(p):
     return hashlib.sha256(p.encode()).hexdigest()
 
-# ---------------------------------
-# DB INIT
-# ---------------------------------
+# ---------------- DB ----------------
 conn = db()
 c = conn.cursor()
 
@@ -30,6 +25,15 @@ password TEXT,
 rango TEXT DEFAULT 'USER'
 )''')
 
+c.execute('''CREATE TABLE IF NOT EXISTS cuentas (
+id INTEGER PRIMARY KEY,
+plataforma TEXT,
+email TEXT,
+password TEXT,
+vencimiento TEXT,
+precio REAL
+)''')
+
 c.execute('''CREATE TABLE IF NOT EXISTS clientes (
 id INTEGER PRIMARY KEY,
 nombre TEXT,
@@ -38,16 +42,14 @@ whatsapp TEXT
 
 conn.commit()
 
-# ADMIN DEFAULT
+# ADMIN
 c.execute("SELECT * FROM usuarios WHERE user='admin'")
 if not c.fetchone():
     c.execute("INSERT INTO usuarios (user,password,rango) VALUES (?,?,?)",
               ("admin", hash_pass("admin123"), "ADMIN"))
     conn.commit()
 
-# ---------------------------------
-# CSS PRO
-# ---------------------------------
+# ---------------- CSS PRO ----------------
 st.markdown("""
 <style>
 .stApp {
@@ -58,7 +60,7 @@ st.markdown("""
 /* TITULO */
 .title {
     text-align:center;
-    font-size:40px;
+    font-size:38px;
     font-weight:900;
     background: linear-gradient(90deg,#00f5ff,#00ff85);
     -webkit-background-clip:text;
@@ -66,42 +68,39 @@ st.markdown("""
 }
 
 /* BOTONES GRANDES */
-.big-btn button {
+.btn-grid button {
     height:120px;
     width:100%;
-    border-radius:18px;
-    font-size:18px;
-    font-weight:bold;
-    background: linear-gradient(135deg,#111827,#1f2937);
+    border-radius:16px;
+    font-size:16px;
+    font-weight:600;
+    background: #111827;
     border:1px solid rgba(255,255,255,0.1);
     transition:0.3s;
 }
-.big-btn button:hover {
+.btn-grid button:hover {
     transform:scale(1.05);
     box-shadow:0 0 20px #00ffff;
 }
 
-/* LOGIN BOX */
+/* LOGIN */
 .login {
     background: rgba(255,255,255,0.05);
-    padding:40px;
+    padding:35px;
     border-radius:20px;
-    backdrop-filter: blur(10px);
 }
 </style>
 """, unsafe_allow_html=True)
 
-# ---------------------------------
-# SESSION
-# ---------------------------------
+# ---------------- SESSION ----------------
 if "auth" not in st.session_state:
     st.session_state.auth = False
 if "step" not in st.session_state:
     st.session_state.step = "login"
+if "modulo" not in st.session_state:
+    st.session_state.modulo = None
 
-# ---------------------------------
-# LOGIN + REGISTER
-# ---------------------------------
+# ---------------- LOGIN ----------------
 if not st.session_state.auth:
 
     col1, col2, col3 = st.columns([1,1.2,1])
@@ -110,54 +109,47 @@ if not st.session_state.auth:
         st.markdown("<div class='login'>", unsafe_allow_html=True)
         st.markdown("<div class='title'>STREAMING PRO</div>", unsafe_allow_html=True)
 
-        tab1, tab2 = st.tabs(["🔐 LOGIN", "📝 REGISTRO"])
+        tab1, tab2 = st.tabs(["LOGIN", "REGISTRO"])
 
-        # LOGIN
         with tab1:
             u = st.text_input("Usuario")
             p = st.text_input("Contraseña", type="password")
 
             if st.button("Ingresar"):
-                c.execute("SELECT id,password,rango FROM usuarios WHERE user=?", (u,))
+                c.execute("SELECT id,password FROM usuarios WHERE user=?", (u,))
                 res = c.fetchone()
-
                 if res and res[1] == hash_pass(p):
                     st.session_state.auth = True
                     st.session_state.uid = res[0]
-                    st.session_state.rango = res[2]
                     st.session_state.step = "modo"
                     st.rerun()
                 else:
                     st.error("Datos incorrectos")
 
-        # REGISTRO
         with tab2:
-            new_u = st.text_input("Nuevo usuario")
-            new_p = st.text_input("Nueva contraseña", type="password")
-
-            if st.button("Registrarme"):
+            nu = st.text_input("Nuevo usuario")
+            np = st.text_input("Nueva contraseña", type="password")
+            if st.button("Registrar"):
                 try:
                     c.execute("INSERT INTO usuarios (user,password) VALUES (?,?)",
-                              (new_u, hash_pass(new_p)))
+                              (nu, hash_pass(np)))
                     conn.commit()
-                    st.success("Registrado, espera aprobación ADMIN")
+                    st.success("Registrado")
                 except:
-                    st.error("Usuario ya existe")
+                    st.error("Usuario existe")
 
         st.markdown("</div>", unsafe_allow_html=True)
 
     st.stop()
 
-# ---------------------------------
-# PASO 1: MODO
-# ---------------------------------
+# ---------------- PASO 1 ----------------
 if st.session_state.step == "modo":
     st.markdown("<div class='title'>SELECCIONA MODO</div>", unsafe_allow_html=True)
 
     c1, c2 = st.columns(2)
 
     with c1:
-        st.markdown('<div class="big-btn">', unsafe_allow_html=True)
+        st.markdown('<div class="btn-grid">', unsafe_allow_html=True)
         if st.button("📱 ADMINISTRAR POR PERFILES"):
             st.session_state.tipo = "PERFILES"
             st.session_state.step = "rol"
@@ -165,40 +157,34 @@ if st.session_state.step == "modo":
         st.markdown('</div>', unsafe_allow_html=True)
 
     with c2:
-        st.markdown('<div class="big-btn">', unsafe_allow_html=True)
+        st.markdown('<div class="btn-grid">', unsafe_allow_html=True)
         if st.button("📧 CUENTAS COMPLETAS"):
             st.session_state.tipo = "CUENTAS"
             st.session_state.step = "rol"
             st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
 
-# ---------------------------------
-# PASO 2: ROL
-# ---------------------------------
+# ---------------- PASO 2 ----------------
 elif st.session_state.step == "rol":
     st.markdown("<div class='title'>TIPO DE USUARIO</div>", unsafe_allow_html=True)
 
     c1, c2 = st.columns(2)
 
     with c1:
-        st.markdown('<div class="big-btn">', unsafe_allow_html=True)
+        st.markdown('<div class="btn-grid">', unsafe_allow_html=True)
         if st.button("👤 CLIENTE FINAL"):
-            st.session_state.rol = "CLIENTE"
             st.session_state.step = "panel"
             st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
 
     with c2:
-        st.markdown('<div class="big-btn">', unsafe_allow_html=True)
+        st.markdown('<div class="btn-grid">', unsafe_allow_html=True)
         if st.button("💼 COMISIONISTA"):
-            st.session_state.rol = "COMISIONISTA"
             st.session_state.step = "panel"
             st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
 
-# ---------------------------------
-# PANEL PRINCIPAL
-# ---------------------------------
+# ---------------- PANEL ----------------
 elif st.session_state.step == "panel":
 
     st.markdown(f"<div class='title'>PANEL {st.session_state.tipo}</div>", unsafe_allow_html=True)
@@ -219,57 +205,68 @@ elif st.session_state.step == "panel":
 
     for i, op in enumerate(opciones):
         with cols[i % 3]:
-            st.markdown('<div class="big-btn">', unsafe_allow_html=True)
-            if st.button(op, key=op):
+            st.markdown('<div class="btn-grid">', unsafe_allow_html=True)
+            if st.button(op):
                 st.session_state.modulo = op
             st.markdown('</div>', unsafe_allow_html=True)
 
     st.write("---")
 
-    # ----------------------------
-    # SUBMODULOS (BASE)
-    # ----------------------------
-    mod = st.session_state.get("modulo", "")
+    # ---------------- FUNCIONALIDAD ----------------
 
-    if mod == "➕ SUBIR CUENTAS":
-        st.header("Subir cuentas")
-        st.info("Aquí irá lógica: perfiles, precios, vencimientos 30 días")
+    if st.session_state.modulo == "➕ SUBIR CUENTAS":
+        st.subheader("Subir cuentas")
 
-    elif mod == "⚙️ ADMINISTRAR":
-        st.header("Administrar cuentas/perfiles")
+        with st.form("subir"):
+            plat = st.selectbox("Plataforma", ["NETFLIX","DISNEY","PRIME"])
+            email = st.text_input("Correo")
+            password = st.text_input("Contraseña")
+            precio = st.number_input("Precio")
+            fecha = st.date_input("Vencimiento")
 
-    elif mod == "👥 CLIENTES":
-        st.header("Clientes")
-        bus = st.text_input("Buscar por WhatsApp")
+            if st.form_submit_button("Guardar"):
+                c.execute("INSERT INTO cuentas (plataforma,email,password,vencimiento,precio) VALUES (?,?,?,?,?)",
+                          (plat,email,password,str(fecha),precio))
+                conn.commit()
+                st.success("Cuenta guardada")
+
+    elif st.session_state.modulo == "⚙️ ADMINISTRAR":
+        st.subheader("Administrar")
+        df = pd.read_sql("SELECT * FROM cuentas", conn)
+        st.dataframe(df)
+
+    elif st.session_state.modulo == "👥 CLIENTES":
+        st.subheader("Clientes")
+        bus = st.text_input("Buscar WhatsApp")
         df = pd.read_sql("SELECT * FROM clientes", conn)
         st.dataframe(df)
 
-    elif mod == "💸 VENDER":
-        st.header("Ventas")
-        st.info("Aquí podrás vender, renovar, cortar, enviar WhatsApp")
+    elif st.session_state.modulo == "💸 VENDER":
+        st.subheader("Ventas (próximo nivel)")
 
-    elif mod == "📦 CUENTAS":
-        st.header("Disponibilidad de cuentas")
+    elif st.session_state.modulo == "📦 CUENTAS":
+        st.subheader("Cuentas disponibles")
+        df = pd.read_sql("SELECT plataforma, COUNT(*) as total FROM cuentas GROUP BY plataforma", conn)
+        st.dataframe(df)
 
-    elif mod == "🔔 NOTIFICACIONES":
-        st.header("Notificaciones masivas")
+    elif st.session_state.modulo == "🔔 NOTIFICACIONES":
+        st.subheader("Notificaciones")
 
-    elif mod == "💰 FINANZAS":
-        st.header("Finanzas")
-        st.metric("Ingresos", "S/ 0")
-        st.metric("Egresos", "S/ 0")
-        st.metric("Ganancia", "S/ 0")
+    elif st.session_state.modulo == "💰 FINANZAS":
+        st.subheader("Finanzas")
+        total = pd.read_sql("SELECT SUM(precio) FROM cuentas", conn).iloc[0,0]
+        st.metric("Ingresos", f"S/ {total or 0}")
 
-    elif mod == "👨‍💻 USUARIOS":
-        st.header("Usuarios")
+    elif st.session_state.modulo == "👨‍💻 USUARIOS":
+        st.subheader("Usuarios")
         df = pd.read_sql("SELECT user,rango FROM usuarios", conn)
         st.dataframe(df)
 
-    elif mod == "👤 MI CUENTA":
-        st.header("Mi cuenta")
-        new_pass = st.text_input("Nueva contraseña", type="password")
+    elif st.session_state.modulo == "👤 MI CUENTA":
+        st.subheader("Mi cuenta")
+        newp = st.text_input("Nueva contraseña", type="password")
         if st.button("Actualizar"):
             c.execute("UPDATE usuarios SET password=? WHERE id=?",
-                      (hash_pass(new_pass), st.session_state.uid))
+                      (hash_pass(newp), st.session_state.uid))
             conn.commit()
-            st.success("Contraseña actualizada")
+            st.success("Actualizado")
