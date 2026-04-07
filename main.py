@@ -7,7 +7,7 @@ import pandas as pd
 st.set_page_config(page_title="STREAMING PRO", layout="wide")
 
 # =========================
-# BASE DE DATOS (CORREGIDO)
+# DB
 # =========================
 conn = sqlite3.connect("streaming_pro.db", check_same_thread=False)
 c = conn.cursor()
@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS usuarios(
 id INTEGER PRIMARY KEY AUTOINCREMENT,
 user TEXT UNIQUE,
 password TEXT,
-rango TEXT DEFAULT 'USER'
+rango TEXT
 )
 """)
 
@@ -44,35 +44,43 @@ def hash_pass(p):
     return hashlib.sha256(p.encode()).hexdigest()
 
 # =========================
-# CSS PRO (CARDS GRANDES)
+# ADMIN FIJO
+# =========================
+admin = c.execute("SELECT * FROM usuarios WHERE user='admin'").fetchone()
+
+if not admin:
+    c.execute(
+        "INSERT INTO usuarios(user,password,rango) VALUES (?,?,?)",
+        ("admin", hash_pass("admin123"), "ADMIN")
+    )
+    conn.commit()
+
+# =========================
+# CSS PRO
 # =========================
 st.markdown("""
 <style>
 
-.stApp {background: #0a0f1f; color:white;}
-
-.card {
-    background: linear-gradient(145deg,#111827,#1f2937);
-    border-radius: 20px;
-    padding: 40px;
-    text-align:center;
-    transition:0.3s;
-    border:1px solid #1f2937;
-    cursor:pointer;
-}
-.card:hover {
-    transform:scale(1.05);
-    box-shadow:0 0 25px #00ffc3;
+.stApp {
+background: linear-gradient(135deg,#020617,#020617,#020617);
+color:white;
 }
 
 .big-btn button {
-    height:160px;
-    width:100%;
-    border-radius:20px;
-    font-size:20px;
-    font-weight:bold;
-    background:linear-gradient(135deg,#00ffc3,#0066ff);
-    color:white;
+height:140px;
+width:100%;
+border-radius:20px;
+font-size:20px;
+font-weight:bold;
+background: linear-gradient(135deg,#00ffc3,#0066ff);
+color:white;
+border:none;
+transition:0.3s;
+}
+
+.big-btn button:hover {
+transform:scale(1.05);
+box-shadow:0 0 25px #00ffc3;
 }
 
 </style>
@@ -83,11 +91,12 @@ st.markdown("""
 # =========================
 if "login" not in st.session_state:
     st.session_state.login = False
+
 if "menu" not in st.session_state:
     st.session_state.menu = "home"
 
 # =========================
-# LOGIN + REGISTER
+# LOGIN / REGISTER
 # =========================
 if not st.session_state.login:
 
@@ -99,13 +108,22 @@ if not st.session_state.login:
         p = st.text_input("Password", type="password")
 
         if st.button("Entrar"):
-            res = c.execute("SELECT * FROM usuarios WHERE user=?",(u,)).fetchone()
-            if res and res[2] == hash_pass(p):
+
+            # ADMIN DIRECTO
+            if u == "admin" and p == "admin123":
                 st.session_state.login = True
-                st.session_state.user = u
+                st.session_state.user = "admin"
                 st.rerun()
+
             else:
-                st.error("Datos incorrectos")
+                res = c.execute("SELECT * FROM usuarios WHERE user=?",(u,)).fetchone()
+
+                if res and res[2] == hash_pass(p):
+                    st.session_state.login = True
+                    st.session_state.user = u
+                    st.rerun()
+                else:
+                    st.error("Datos incorrectos")
 
     with col2:
         st.subheader("📝 Registro")
@@ -114,39 +132,50 @@ if not st.session_state.login:
 
         if st.button("Registrar"):
             try:
-                c.execute("INSERT INTO usuarios(user,password) VALUES (?,?)",(u2,hash_pass(p2)))
+                c.execute("INSERT INTO usuarios(user,password,rango) VALUES (?,?,?)",
+                          (u2, hash_pass(p2), "USER"))
                 conn.commit()
-                st.success("Registrado, espera aprobación ADMIN")
+                st.success("Registrado correctamente")
             except:
                 st.error("Usuario ya existe")
 
     st.stop()
 
 # =========================
-# MENU PRINCIPAL PRO
+# PANEL PRINCIPAL
 # =========================
 st.title("🔥 PANEL PRO")
 
 col1,col2,col3,col4 = st.columns(4)
 
 with col1:
-    if st.button("➕ SUBIR", key="subir"):
+    st.markdown('<div class="big-btn">', unsafe_allow_html=True)
+    if st.button("➕ SUBIR"):
         st.session_state.menu="subir"
+    st.markdown('</div>', unsafe_allow_html=True)
 
 with col2:
-    if st.button("💰 VENDER", key="vender"):
+    st.markdown('<div class="big-btn">', unsafe_allow_html=True)
+    if st.button("💰 VENDER"):
         st.session_state.menu="vender"
+    st.markdown('</div>', unsafe_allow_html=True)
 
 with col3:
-    if st.button("📦 CUENTAS", key="cuentas"):
+    st.markdown('<div class="big-btn">', unsafe_allow_html=True)
+    if st.button("📦 CUENTAS"):
         st.session_state.menu="cuentas"
+    st.markdown('</div>', unsafe_allow_html=True)
 
 with col4:
-    if st.button("📊 FINANZAS", key="fin"):
+    st.markdown('<div class="big-btn">', unsafe_allow_html=True)
+    if st.button("📊 FINANZAS"):
         st.session_state.menu="finanzas"
+    st.markdown('</div>', unsafe_allow_html=True)
+
+st.write("---")
 
 # =========================
-# SUBIR (ARREGLADO ERROR)
+# SUBIR
 # =========================
 if st.session_state.menu=="subir":
 
@@ -156,11 +185,11 @@ if st.session_state.menu=="subir":
     email = st.text_input("Email")
     password = st.text_input("Password")
     precio = st.number_input("Precio",0.0)
-    dias = st.number_input("Duración días",30)
+    dias = st.number_input("Duración (días)",30)
 
-    if st.button("Guardar Cuenta"):
+    if st.button("Guardar"):
 
-        fecha = datetime.now() + timedelta(days=dias)
+        fecha = datetime.now() + timedelta(days=int(dias))
 
         c.execute("""
         INSERT INTO cuentas(plataforma,email,password,precio,estado,fecha_vence,cliente,whatsapp)
@@ -171,7 +200,7 @@ if st.session_state.menu=="subir":
         st.success("Cuenta guardada")
 
 # =========================
-# VENDER (FUNCIONAL)
+# VENDER
 # =========================
 if st.session_state.menu=="vender":
 
@@ -182,18 +211,18 @@ if st.session_state.menu=="vender":
     if df.empty:
         st.warning("No hay cuentas disponibles")
     else:
-        sel = st.selectbox("Seleccionar cuenta", df["email"])
+        cuenta = st.selectbox("Cuenta disponible", df["email"])
 
-        cliente = st.text_input("Nombre cliente")
+        cliente = st.text_input("Cliente")
         whatsapp = st.text_input("WhatsApp")
 
-        if st.button("Vender"):
+        if st.button("Confirmar venta"):
 
             c.execute("""
             UPDATE cuentas 
             SET estado='OCUPADO', cliente=?, whatsapp=? 
             WHERE email=?
-            """,(cliente,whatsapp,sel))
+            """,(cliente,whatsapp,cuenta))
 
             conn.commit()
             st.success("Venta realizada")
@@ -204,7 +233,6 @@ if st.session_state.menu=="vender":
 if st.session_state.menu=="cuentas":
 
     st.header("📦 Todas las cuentas")
-
     df = pd.read_sql("SELECT * FROM cuentas", conn)
     st.dataframe(df, use_container_width=True)
 
@@ -217,6 +245,6 @@ if st.session_state.menu=="finanzas":
 
     df = pd.read_sql("SELECT * FROM cuentas WHERE estado='OCUPADO'", conn)
 
-    total = df["precio"].sum()
+    total = df["precio"].sum() if not df.empty else 0
 
-    st.metric("Ingresos Totales", f"S/ {total}")
+    st.metric("Ingresos Totales", f"S/ {total:.2f}")
