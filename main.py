@@ -1,250 +1,216 @@
 import streamlit as st
 import sqlite3
-import hashlib
-from datetime import datetime, timedelta
 import pandas as pd
+from datetime import datetime, timedelta
+import urllib.parse
+import hashlib
 
-st.set_page_config(page_title="STREAMING PRO", layout="wide")
+# --- CONFIGURACIÓN DE PÁGINA ---
+st.set_page_config(page_title="PERUVIAN STREAMING - NEON PRO", page_icon="💎", layout="wide")
 
-# =========================
-# DB
-# =========================
-conn = sqlite3.connect("streaming_pro.db", check_same_thread=False)
-c = conn.cursor()
+# --- BASE DE DATOS ---
+DB_NAME = 'db_streaming_neon_v13.db'
 
-c.execute("""
-CREATE TABLE IF NOT EXISTS usuarios(
-id INTEGER PRIMARY KEY AUTOINCREMENT,
-user TEXT UNIQUE,
-password TEXT,
-rango TEXT
-)
-""")
+def get_db():
+    return sqlite3.connect(DB_NAME, check_same_thread=False)
 
-c.execute("""
-CREATE TABLE IF NOT EXISTS cuentas(
-id INTEGER PRIMARY KEY AUTOINCREMENT,
-plataforma TEXT,
-email TEXT,
-password TEXT,
-precio REAL,
-estado TEXT,
-fecha_vence TEXT,
-cliente TEXT,
-whatsapp TEXT
-)
-""")
+def hash_pass(password):
+    return hashlib.sha256(str.encode(password)).hexdigest()
 
-conn.commit()
-
-# =========================
-# FUNCIONES
-# =========================
-def hash_pass(p):
-    return hashlib.sha256(p.encode()).hexdigest()
-
-# =========================
-# ADMIN FIJO
-# =========================
-admin = c.execute("SELECT * FROM usuarios WHERE user='admin'").fetchone()
-
-if not admin:
-    c.execute(
-        "INSERT INTO usuarios(user,password,rango) VALUES (?,?,?)",
-        ("admin", hash_pass("admin123"), "ADMIN")
-    )
+def init_db():
+    conn = get_db(); cursor = conn.cursor()
+    cursor.execute('CREATE TABLE IF NOT EXISTS usuarios (id INTEGER PRIMARY KEY, user TEXT UNIQUE, password TEXT, rango TEXT)')
+    cursor.execute('''CREATE TABLE IF NOT EXISTS cuentas 
+                      (id INTEGER PRIMARY KEY, tipo_negocio TEXT, plataforma TEXT, email TEXT UNIQUE, 
+                       password TEXT, fecha_proveedor TEXT, costo REAL DEFAULT 0, creador_id INTEGER)''')
+    cursor.execute('''CREATE TABLE IF NOT EXISTS perfiles 
+                      (id INTEGER PRIMARY KEY, email TEXT, plataforma TEXT, nombre TEXT, pin TEXT, 
+                       estado TEXT DEFAULT 'LIBRE', whatsapp TEXT, fecha_vence TEXT, 
+                       precio_venta REAL DEFAULT 0, creador_id INTEGER, fecha_venta TEXT)''')
+    cursor.execute("INSERT OR IGNORE INTO usuarios (user, password, rango) VALUES ('admin', ?, 'ADMIN_GLOBAL')", (hash_pass('admin123'),))
     conn.commit()
 
-# =========================
-# CSS PRO
-# =========================
+init_db()
+
+# --- ESTILOS CSS AVANZADOS (NEÓN Y CROMADO) ---
 st.markdown("""
-<style>
+    <style>
+    #MainMenu {visibility: hidden;} footer {visibility: hidden;} header {visibility: hidden;}
+    .stApp { background-color: #050505; color: #e0e0e0; }
+    
+    /* Efecto Cromado en Títulos */
+    .chrome-text {
+        background: linear-gradient(0deg, #7a7a7a 0%, #ffffff 50%, #7a7a7a 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-weight: 900;
+        text-transform: uppercase;
+        filter: drop-shadow(0 0 2px rgba(255,255,255,0.5));
+    }
 
-.stApp {
-background: linear-gradient(135deg,#020617,#020617,#020617);
-color:white;
-}
+    /* Botones Neón */
+    .stButton>button {
+        background-color: transparent !important;
+        color: white !important;
+        border: 2px solid #00ff00 !important;
+        border-radius: 12px !important;
+        box-shadow: 0 0 10px rgba(0,255,0,0.2);
+        transition: 0.3s;
+        text-transform: uppercase;
+        font-weight: bold;
+    }
+    .stButton>button:hover {
+        box-shadow: 0 0 20px #00ff00;
+        transform: scale(1.02);
+        color: #00ff00 !important;
+    }
+    
+    /* Botones de colores para plataformas */
+    .btn-netflix>button { border-color: #E50914 !important; color: #E50914 !important; }
+    .btn-disney>button { border-color: #006E99 !important; color: #006E99 !important; }
 
-.big-btn button {
-height:140px;
-width:100%;
-border-radius:20px;
-font-size:20px;
-font-weight:bold;
-background: linear-gradient(135deg,#00ffc3,#0066ff);
-color:white;
-border:none;
-transition:0.3s;
-}
-
-.big-btn button:hover {
-transform:scale(1.05);
-box-shadow:0 0 25px #00ffc3;
-}
-
-</style>
+    /* Tarjetas de Dashboard */
+    div[data-testid="stMetric"] {
+        background-color: #1a1a1a;
+        padding: 20px;
+        border-radius: 10px;
+        border: 1px solid #333;
+    }
+    
+    /* Login Centered Hacker Image */
+    .hacker-img { display: block; margin: 0 auto 20px; border-radius: 50%; box-shadow: 0 0 30px #00ff00; }
+    </style>
 """, unsafe_allow_html=True)
 
-# =========================
-# SESSION
-# =========================
-if "login" not in st.session_state:
-    st.session_state.login = False
+# --- UTILIDADES ---
+def moneda(valor): return f"S/ {valor:,.2f}"
+def calcular_dias(fecha_str):
+    try:
+        f = datetime.strptime(fecha_str, "%d/%m/%Y")
+        return (f - datetime.now()).days + 1
+    except: return 0
 
-if "menu" not in st.session_state:
-    st.session_state.menu = "home"
+# --- NAVEGACIÓN ---
+if 'auth' not in st.session_state: st.session_state['auth'] = False
+if 'modo' not in st.session_state: st.session_state['modo'] = None
+if 'herramienta' not in st.session_state: st.session_state['herramienta'] = 'MENU'
 
-# =========================
-# LOGIN / REGISTER
-# =========================
-if not st.session_state.login:
-
-    col1,col2 = st.columns(2)
-
-    with col1:
-        st.subheader("🔐 Login")
-        u = st.text_input("Usuario")
-        p = st.text_input("Password", type="password")
-
-        if st.button("Entrar"):
-
-            # ADMIN DIRECTO
-            if u == "admin" and p == "admin123":
-                st.session_state.login = True
-                st.session_state.user = "admin"
+# ==========================================
+# 1. LOGIN HACKER PRO
+# ==========================================
+if not st.session_state['auth']:
+    _, col_log, _ = st.columns([1, 1.2, 1])
+    with col_log:
+        st.markdown("<div style='text-align:center;'><img src='https://cdn.pixabay.com/photo/2024/02/09/11/48/hacker-8562942_1280.png' class='hacker-img' width='250'></div>", unsafe_allow_html=True)
+        st.markdown("<h1 class='chrome-text' style='text-align:center;'>SISTEMA VIP</h1>", unsafe_allow_html=True)
+        u = st.text_input("USUARIO", key="user_in")
+        p = st.text_input("CONTRASEÑA", type="password", key="pass_in")
+        if st.button("🚀 ENTRAR AL SISTEMA", use_container_width=True):
+            conn = get_db(); cursor = conn.cursor()
+            cursor.execute("SELECT id, rango, password FROM usuarios WHERE user=?", (u,))
+            res = cursor.fetchone()
+            if res and res[2] == hash_pass(p):
+                st.session_state.update({'auth': True, 'u_id': res[0], 'u_nom': u, 'u_ran': res[1], 'modo': None, 'herramienta': 'MENU'})
                 st.rerun()
-
-            else:
-                res = c.execute("SELECT * FROM usuarios WHERE user=?",(u,)).fetchone()
-
-                if res and res[2] == hash_pass(p):
-                    st.session_state.login = True
-                    st.session_state.user = u
-                    st.rerun()
-                else:
-                    st.error("Datos incorrectos")
-
-    with col2:
-        st.subheader("📝 Registro")
-        u2 = st.text_input("Nuevo usuario")
-        p2 = st.text_input("Nueva contraseña", type="password")
-
-        if st.button("Registrar"):
-            try:
-                c.execute("INSERT INTO usuarios(user,password,rango) VALUES (?,?,?)",
-                          (u2, hash_pass(p2), "USER"))
-                conn.commit()
-                st.success("Registrado correctamente")
-            except:
-                st.error("Usuario ya existe")
-
+            else: st.error("ACCESO DENEGADO")
+        if st.button("❓ OLVIDÉ MI CONTRASEÑA", type="secondary"):
+            st.info("CONTACTA A SAÚL PARA REINICIAR CREDENCIALES")
     st.stop()
 
-# =========================
-# PANEL PRINCIPAL
-# =========================
-st.title("🔥 PANEL PRO")
+# --- SIDEBAR ELITE ---
+st.sidebar.markdown(f"<h2 class='chrome-text'>👤 {st.session_state['u_nom'].upper()}</h2>", unsafe_allow_html=True)
+if st.session_state['u_ran'] == 'ADMIN_GLOBAL':
+    menu = st.sidebar.radio("Ir a:", ["📊 DASHBOARD", "🌐 PLATAFORMAS", "📱 GESTIÓN PERFILES", "🔔 NOTIFICACIONES", "💰 FINANZAS PRO", "🗑️ ELIMINAR", "👥 USUARIOS GLOBALES", "🚪 SALIR"])
+else:
+    menu = st.sidebar.radio("Ir a:", ["📊 DASHBOARD", "🌐 PLATAFORMAS", "📱 GESTIÓN PERFILES", "🔔 NOTIFICACIONES", "💰 FINANZAS PRO", "🔑 CAMBIAR CLAVE", "🚪 SALIR"])
 
-col1,col2,col3,col4 = st.columns(4)
+conn = get_db(); uid = st.session_state['u_id']
 
-with col1:
-    st.markdown('<div class="big-btn">', unsafe_allow_html=True)
-    if st.button("➕ SUBIR"):
-        st.session_state.menu="subir"
-    st.markdown('</div>', unsafe_allow_html=True)
+# ==========================================
+# 2. SELECTOR DE MODO (GIGANTES IGUALES v11.0)
+# ==========================================
+if st.session_state['modo'] is None:
+    st.markdown("<h1 class='chrome-text'>SELECCIONE MODO DE TRABAJO</h1>", unsafe_allow_html=True)
+    st.write("---")
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        # Icono grande y visible arriba del texto
+        st.markdown("<p align='center'><img src='https://cdn-icons-png.flaticon.com/512/3067/3067260.png' width='100'></p>", unsafe_allow_html=True)
+        if st.button("📱 VENTA POR PERFILES", use_container_width=True):
+            st.session_state['modo'] = "PERFILES"; st.rerun()
+            
+    with col2:
+        # Icono grande y visible arriba del texto
+        st.markdown("<p align='center'><img src='https://cdn-icons-png.flaticon.com/512/5602/5602732.png' width='100'></p>", unsafe_allow_html=True)
+        if st.button("📧 CUENTAS COMPLETAS", use_container_width=True):
+            st.session_state['modo'] = "CUENTAS"; st.rerun()
+    st.stop()
 
-with col2:
-    st.markdown('<div class="big-btn">', unsafe_allow_html=True)
-    if st.button("💰 VENDER"):
-        st.session_state.menu="vender"
-    st.markdown('</div>', unsafe_allow_html=True)
+# ==========================================
+# 3. GESTIÓN DE PERFILES (WHATSAPP PRO)
+# ==========================================
+elif menu == "📱 GESTIÓN PERFILES":
+    st.markdown("<h1 class='chrome-text'>PANEL DE VENTAS</h1>", unsafe_allow_html=True)
+    
+    # Selector por botones de colores
+    colp = st.columns(6)
+    plats = [("NETFLIX","#E50914"), ("MAX","#7B2CBF"), ("PRIME","#00A8E1"), ("DISNEY","#006E99"), ("VIX","#FF5A00"), ("CRUNCHY","#F47521")]
+    for i, (name, color) in enumerate(plats):
+        if colp[i].button(name, key=f"btn_{name}"): st.session_state['p_sel'] = name
+        
+    p_sel = st.session_state.get('p_sel', 'NETFLIX')
+    st.markdown(f"### ADMINISTRANDO: {p_sel}", unsafe_allow_html=True)
+    
+    ctas = pd.read_sql_query(f"SELECT email, password FROM cuentas WHERE plataforma='{p_sel}' AND creador_id={uid}", conn)
+    if not ctas.empty:
+        for _, c in ctas.iterrows():
+            with st.expander(f"📧 {c['email']}"):
+                st.code(f"CLAVE MAESTRA: {c['password']}")
+                perfs = pd.read_sql_query(f"SELECT * FROM perfiles WHERE email='{c['email']}' AND creador_id={uid}", conn)
+                for _, row in perfs.iterrows():
+                    st.markdown(f"<div class='stMetric'><b>{row['estado']}</b> | Perfil: {row['nombre']} | PIN: {row['pin']}</div>", unsafe_allow_html=True)
+                    if row['estado'] == 'LIBRE':
+                        c1, c2 = st.columns(2)
+                        wa = c1.text_input("WhatsApp", key=f"wa_{row['id']}")
+                        if c2.button("🛒 VENDER", key=f"v_{row['id']}"):
+                            v = (datetime.now() + timedelta(days=30)).strftime("%d/%m/%Y")
+                            conn.cursor().execute(f"UPDATE perfiles SET estado='VENDIDO', whatsapp='{wa}', fecha_vence='{v}' WHERE id={row['id']}")
+                            conn.commit(); st.rerun()
+                    else:
+                        d = calcular_dias(row['fecha_vence'])
+                        st.write(f"📅 Vence: {row['fecha_vence']} (**{d} días**)")
+                        
+                        cb1, cb2, cb3 = st.columns(3)
+                        if cb1.button("🔄 RENOVAR", key=f"r_{row['id']}", use_container_width=True):
+                            nueva = (datetime.strptime(row['fecha_vence'], "%d/%m/%Y") + timedelta(days=30)).strftime("%d/%m/%Y")
+                            conn.cursor().execute(f"UPDATE perfiles SET fecha_vence='{nueva}' WHERE id={row['id']}")
+                            conn.commit(); st.rerun()
+                        if cb2.button("✂️ CORTAR", key=f"c_{row['id']}", use_container_width=True):
+                            conn.cursor().execute(f"UPDATE perfiles SET estado='LIBRE', whatsapp=NULL, precio_venta=0 WHERE id={row['id']}")
+                            conn.commit(); st.rerun()
+                        msg = f"*ENTREGA {p_sel}*\n- Correo: {c['email']}\n- Clave: {c['password']}\n- Perfil: {row['nombre']}\n- PIN: {row['pin']}\n- Vence: {row['fecha_vence']}"
+                        cb3.markdown(f'<a href="https://wa.me/{row["whatsapp"]}?text={urllib.parse.quote(msg)}" target="_blank" style="text-decoration:none;"><button style="background-color:#25D366; color:white; border:none; padding:10px; border-radius:10px; width:100%;">🚀 WHATSAPP</button></a>', unsafe_allow_html=True)
 
-with col3:
-    st.markdown('<div class="big-btn">', unsafe_allow_html=True)
-    if st.button("📦 CUENTAS"):
-        st.session_state.menu="cuentas"
-    st.markdown('</div>', unsafe_allow_html=True)
+# --- MENÚS DE DASHBOARD Y PLATAFORMAS (RESTO DEL CÓDIGO v11.0) ---
+elif menu == "📊 DASHBOARD":
+    st.markdown("<h1 class='chrome-text'>RESUMEN DE NEGOCIO</h1>", unsafe_allow_html=True)
+    c1, c2, c3 = st.columns(3)
+    c1.metric("📦 CUENTAS MAESTRAS", pd.read_sql_query(f"SELECT COUNT(*) FROM cuentas WHERE creador_id={uid}", conn).iloc[0,0])
+    c2.metric("✅ PERFILES VENDIDOS", pd.read_sql_query(f"SELECT COUNT(*) FROM perfiles WHERE estado='VENDIDO' AND creador_id={uid}", conn).iloc[0,0])
+    c3.metric("🔓 PERFILES LIBRES", pd.read_sql_query(f"SELECT COUNT(*) FROM perfiles WHERE estado='LIBRE' AND creador_id={uid}", conn).iloc[0,0])
 
-with col4:
-    st.markdown('<div class="big-btn">', unsafe_allow_html=True)
-    if st.button("📊 FINANZAS"):
-        st.session_state.menu="finanzas"
-    st.markdown('</div>', unsafe_allow_html=True)
-
-st.write("---")
-
-# =========================
-# SUBIR
-# =========================
-if st.session_state.menu=="subir":
-
-    st.header("➕ Subir Cuenta")
-
-    plataforma = st.selectbox("Plataforma",["Netflix","Disney","Prime","HBO"])
-    email = st.text_input("Email")
-    password = st.text_input("Password")
-    precio = st.number_input("Precio",0.0)
-    dias = st.number_input("Duración (días)",30)
-
-    if st.button("Guardar"):
-
-        fecha = datetime.now() + timedelta(days=int(dias))
-
-        c.execute("""
-        INSERT INTO cuentas(plataforma,email,password,precio,estado,fecha_vence,cliente,whatsapp)
-        VALUES (?,?,?,?,?,?,?,?)
-        """,(plataforma,email,password,precio,"LIBRE",fecha.strftime("%Y-%m-%d"),"", ""))
-
-        conn.commit()
-        st.success("Cuenta guardada")
-
-# =========================
-# VENDER
-# =========================
-if st.session_state.menu=="vender":
-
-    st.header("💰 Vender Cuenta")
-
-    df = pd.read_sql("SELECT * FROM cuentas WHERE estado='LIBRE'", conn)
-
-    if df.empty:
-        st.warning("No hay cuentas disponibles")
-    else:
-        cuenta = st.selectbox("Cuenta disponible", df["email"])
-
-        cliente = st.text_input("Cliente")
-        whatsapp = st.text_input("WhatsApp")
-
-        if st.button("Confirmar venta"):
-
-            c.execute("""
-            UPDATE cuentas 
-            SET estado='OCUPADO', cliente=?, whatsapp=? 
-            WHERE email=?
-            """,(cliente,whatsapp,cuenta))
-
-            conn.commit()
-            st.success("Venta realizada")
-
-# =========================
-# CUENTAS
-# =========================
-if st.session_state.menu=="cuentas":
-
-    st.header("📦 Todas las cuentas")
-    df = pd.read_sql("SELECT * FROM cuentas", conn)
-    st.dataframe(df, use_container_width=True)
-
-# =========================
-# FINANZAS
-# =========================
-if st.session_state.menu=="finanzas":
-
-    st.header("📊 Finanzas")
-
-    df = pd.read_sql("SELECT * FROM cuentas WHERE estado='OCUPADO'", conn)
-
-    total = df["precio"].sum() if not df.empty else 0
-
-    st.metric("Ingresos Totales", f"S/ {total:.2f}")
+elif menu == "🌐 PLATAFORMAS":
+    st.markdown("<h1 class='chrome-text'>REGISTRO DE CUENTAS</h1>", unsafe_allow_html=True)
+    with st.form("reg_mas"):
+        c1, c2, c3 = st.columns([2,2,1])
+        plat = c1.selectbox("PLATAFORMA", ["NETFLIX","MAX","PRIME","DISNEY","VIX","CRUNCHY"])
+        mail = c2.text_input("CORREO ELECTRÓNICO")
+        clv = c1.text_input("CONTRASEÑA")
+        cst = c2.number_input("COSTO S/", 0.0)
+        vnc = c3.date_input("VENCIMIENTO PROVEEDOR")
+        if st.form_submit_button("🚀 ACTIVAR MAESTRA"):
+            try:
+                conn.cursor().execute("INSERT INTO cuentas (tipo_negocio, plataforma, email, password, fecha_proveedor, costo, creador_id) VALUES ('SOCIO VIP',?,?,?,?,?,?)", (plat, mail, clv, vnc.strftime("%d/%m/%Y"), cst, uid))
+                conn.commit(); st.success("CUENTA CREADA")
+            except: st.error("DUPLICADO")
