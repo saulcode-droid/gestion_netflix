@@ -85,81 +85,6 @@ section[data-testid="stSidebar"] .stRadio label:hover {
     color: #C4B5FD !important;
 }
 
-/* ─── BARRA NAVEGACIÓN MÓVIL ─── */
-.mobile-nav {
-    display: none;
-    position: fixed;
-    bottom: 0; left: 0; right: 0;
-    background: rgba(8, 9, 15, 0.97);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-top: 1px solid rgba(99,102,241,0.2);
-    z-index: 9999;
-    padding: 6px 0 calc(6px + env(safe-area-inset-bottom));
-    box-shadow: 0 -8px 32px rgba(0,0,0,0.6);
-}
-.mobile-nav-inner {
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    max-width: 600px;
-    margin: 0 auto;
-}
-.mobile-nav-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 3px;
-    padding: 6px 8px;
-    border-radius: 12px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    min-width: 52px;
-    border: none;
-    background: transparent;
-    color: #475569;
-    text-decoration: none;
-}
-.mobile-nav-item:hover { color: #A5B4FC; background: rgba(99,102,241,0.1); }
-.mobile-nav-item.active { color: #A5B4FC; background: rgba(99,102,241,0.15); }
-.mobile-nav-item .nav-icon { font-size: 1.3rem; line-height: 1; }
-.mobile-nav-item .nav-label { font-size: 0.6rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; white-space: nowrap; }
-
-/* ─── BOTÓN MENÚ EXTRA MÓVIL ─── */
-.mobile-more-menu {
-    display: none;
-    position: fixed;
-    bottom: 72px; right: 12px;
-    background: rgba(10, 11, 20, 0.98);
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(99,102,241,0.25);
-    border-radius: 18px;
-    padding: 8px;
-    z-index: 9998;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.6);
-    min-width: 170px;
-}
-.mobile-more-menu.open { display: block; }
-.more-menu-item {
-    display: flex; align-items: center; gap: 10px;
-    padding: 10px 14px; border-radius: 10px;
-    color: #94A3B8; font-size: 0.88rem; font-weight: 600;
-    cursor: pointer; transition: all 0.2s; white-space: nowrap;
-}
-.more-menu-item:hover { background: rgba(99,102,241,0.15); color: #A5B4FC; }
-.more-menu-item.active-item { background: rgba(99,102,241,0.2); color: #A5B4FC; }
-
-/* Espacio inferior en móvil para no tapar contenido con la barra */
-@media (max-width: 768px) {
-    .mobile-nav { display: block !important; }
-    .main .block-container { padding-bottom: 90px !important; }
-    /* Ocultar sidebar en móvil cuando tenemos barra inferior */
-    section[data-testid="stSidebar"] { display: none !important; }
-    /* Reducir padding lateral en móvil */
-    .main .block-container { padding-left: 1rem !important; padding-right: 1rem !important; }
-}
-
 /* ─── TÍTULOS ─── */
 .title-main {
     font-family: 'Syne', sans-serif;
@@ -390,6 +315,200 @@ label { color: #64748B !important; font-size: 0.8rem !important; font-weight: 50
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: #060810; }
 ::-webkit-scrollbar-thumb { background: #1E1B4B; border-radius: 4px; }
+
+/* ════════════════════════════════
+   NAVEGACIÓN MÓVIL — DRAWER LATERAL
+   ════════════════════════════════ */
+
+/* Ocultar sidebar nativo en móvil */
+@media (max-width: 768px) {
+    section[data-testid="stSidebar"] { display: none !important; }
+    .main .block-container { 
+        padding-left: 0.8rem !important; 
+        padding-right: 0.8rem !important;
+        padding-bottom: 20px !important;
+        padding-top: 60px !important;
+    }
+}
+
+/* Botón hamburguesa fijo arriba */
+#mobile-hamburger-btn {
+    display: none;
+    position: fixed;
+    top: 10px;
+    left: 12px;
+    z-index: 99999;
+    background: rgba(10, 11, 20, 0.95);
+    border: 1px solid rgba(99,102,241,0.4);
+    border-radius: 12px;
+    width: 44px;
+    height: 44px;
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    color: #A5B4FC;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    transition: all 0.2s ease;
+}
+#mobile-hamburger-btn:active {
+    transform: scale(0.95);
+    background: rgba(99,102,241,0.2);
+}
+
+/* Overlay oscuro */
+#mobile-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 99997;
+    backdrop-filter: blur(2px);
+}
+
+/* Drawer lateral */
+#mobile-drawer {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: -100%;
+    width: 280px;
+    height: 100%;
+    background: #09090F;
+    border-right: 1px solid rgba(99,102,241,0.2);
+    z-index: 99998;
+    overflow-y: auto;
+    transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 8px 0 40px rgba(0,0,0,0.6);
+}
+#mobile-drawer.open {
+    left: 0;
+}
+
+/* Header del drawer */
+.drawer-header {
+    background: linear-gradient(145deg, #0D0F1A, #111320);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    padding: 24px 20px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.drawer-logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.1rem;
+    background: linear-gradient(135deg, #FFFFFF, #7C3AED);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+.drawer-close {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #94A3B8;
+    font-size: 1rem;
+    transition: all 0.2s;
+}
+.drawer-close:active { background: rgba(239,68,68,0.2); color: #F87171; }
+
+/* Info del usuario en drawer */
+.drawer-user {
+    padding: 16px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.drawer-user-name {
+    color: #F1F5F9;
+    font-weight: 700;
+    font-size: 0.9rem;
+    font-family: 'Syne', sans-serif;
+}
+.drawer-user-role {
+    color: #7C3AED;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin-top: 4px;
+}
+
+/* Modo badge en drawer */
+.drawer-modo {
+    margin: 12px 16px;
+    background: rgba(99,102,241,0.1);
+    border: 1px solid rgba(99,102,241,0.25);
+    border-radius: 10px;
+    padding: 10px 14px;
+}
+.drawer-modo-label {
+    color: #6366F1;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 3px;
+}
+.drawer-modo-value {
+    color: #A5B4FC;
+    font-weight: 700;
+    font-size: 0.85rem;
+}
+
+/* Items del menú en drawer */
+.drawer-menu {
+    padding: 8px 12px;
+}
+.drawer-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 13px 14px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: #94A3B8;
+    font-weight: 600;
+    font-size: 0.9rem;
+    border: 1px solid transparent;
+    margin-bottom: 3px;
+    text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+}
+.drawer-menu-item:hover,
+.drawer-menu-item:active {
+    background: rgba(99,102,241,0.12);
+    border-color: rgba(99,102,241,0.2);
+    color: #C4B5FD;
+}
+.drawer-menu-item.active {
+    background: rgba(99,102,241,0.15);
+    border-color: rgba(99,102,241,0.3);
+    color: #A5B4FC;
+}
+.drawer-menu-item .item-icon {
+    font-size: 1.2rem;
+    width: 28px;
+    text-align: center;
+    flex-shrink: 0;
+}
+.drawer-divider {
+    height: 1px;
+    background: rgba(255,255,255,0.05);
+    margin: 8px 14px;
+}
+
+/* Mostrar hamburguesa solo en móvil */
+@media (max-width: 768px) {
+    #mobile-hamburger-btn { display: flex !important; }
+    #mobile-overlay { display: none; }
+    #mobile-drawer { display: block; }
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -454,20 +573,10 @@ HACKER_SVG = """
 MENU_ADMIN = ["📊  Dashboard", "🌐  Plataformas", "📱  Gestión", "👥  Clientes", "🔔  Alertas", "💰  Finanzas", "🗑️  Eliminar", "🔐  Usuarios", "🚪  Salir"]
 MENU_OPER  = ["📊  Dashboard", "🌐  Plataformas", "📱  Gestión", "👥  Clientes", "🔔  Alertas", "💰  Finanzas", "🗑️  Eliminar", "🔑  Mi Clave", "🚪  Salir"]
 
-# Barra móvil: 5 ítems principales + "Más"
-MOBILE_NAV_ITEMS = [
-    {"key": "📊  Dashboard",  "icon": "📊", "label": "Dashboard"},
-    {"key": "📱  Gestión",    "icon": "📱", "label": "Gestión"},
-    {"key": "🔔  Alertas",   "icon": "🔔", "label": "Alertas"},
-    {"key": "👥  Clientes",  "icon": "👥", "label": "Clientes"},
-    {"key": "__MORE__",       "icon": "☰",  "label": "Más"},
-]
-
 # --- SESSION STATE ---
 for k, v in [('auth', False), ('modo', None), ('p_sel', 'NETFLIX'),
              ('edit_perfil_id', None), ('cliente_buscado', None),
-             ('edit_pass_email', None), ('edit_pass_cc_id', None),
-             ('mobile_more_open', False)]:
+             ('edit_pass_email', None), ('edit_pass_cc_id', None)]:
     if k not in st.session_state: st.session_state[k] = v
 
 conn = get_db()
@@ -506,6 +615,28 @@ es_admin = st.session_state['u_ran'] == 'ADMIN_GLOBAL'
 MENU_ITEMS = MENU_ADMIN if es_admin else MENU_OPER
 
 # ══════════════════════════════════════════
+# LEER QUERY PARAMS (navegación móvil)
+# ══════════════════════════════════════════
+try:
+    qp = st.query_params
+    mobile_nav_param = qp.get("mnav", None)
+    if mobile_nav_param:
+        decoded = urllib.parse.unquote(mobile_nav_param)
+        if decoded == '__CAMBIAR_MODO__':
+            st.session_state['modo'] = None
+            st.query_params.clear()
+            st.rerun()
+        elif decoded in MENU_ITEMS:
+            st.session_state['mobile_menu'] = decoded
+            st.query_params.clear()
+            st.rerun()
+except Exception:
+    pass
+
+if 'mobile_menu' not in st.session_state:
+    st.session_state['mobile_menu'] = "📊  Dashboard"
+
+# ══════════════════════════════════════════
 # SIDEBAR (desktop)
 # ══════════════════════════════════════════
 with st.sidebar:
@@ -533,202 +664,146 @@ with st.sidebar:
     menu_sidebar = st.radio("", MENU_ITEMS, label_visibility="collapsed", key="sidebar_menu")
 
 # ══════════════════════════════════════════
-# BARRA NAVEGACIÓN MÓVIL
+# DRAWER MÓVIL — HTML COMPLETO
 # ══════════════════════════════════════════
-# Obtener menú actual (sidebar en desktop, query param en móvil)
-if 'mobile_menu' not in st.session_state:
-    st.session_state['mobile_menu'] = "📊  Dashboard"
+current_menu_mobile = st.session_state.get('mobile_menu', "📊  Dashboard")
+modo_actual = st.session_state.get('modo')
+rango_label_m = "ADMINISTRADOR" if es_admin else "OPERADOR"
+u_nom_m = st.session_state.get('u_nom', '').upper()
 
-# La navegación efectiva combina ambas fuentes
-# En desktop usa sidebar_menu, en móvil usa mobile_menu
-menu = menu_sidebar  # desktop default; móvil lo sobreescribe abajo
-
-# Renderizar barra móvil
-current_mobile = st.session_state.get('mobile_menu', "📊  Dashboard")
-more_open = st.session_state.get('mobile_more_open', False)
-
-# Items del menú "Más" (los que no caben en la barra)
-if es_admin:
-    more_items = [
-        {"key": "🌐  Plataformas", "icon": "🌐", "label": "Plataformas"},
-        {"key": "💰  Finanzas",    "icon": "💰", "label": "Finanzas"},
-        {"key": "🗑️  Eliminar",   "icon": "🗑️", "label": "Eliminar"},
-        {"key": "🔐  Usuarios",    "icon": "🔐", "label": "Usuarios"},
-        {"key": "🚪  Salir",       "icon": "🚪", "label": "Salir"},
-    ]
-else:
-    more_items = [
-        {"key": "🌐  Plataformas", "icon": "🌐", "label": "Plataformas"},
-        {"key": "💰  Finanzas",    "icon": "💰", "label": "Finanzas"},
-        {"key": "🗑️  Eliminar",   "icon": "🗑️", "label": "Eliminar"},
-        {"key": "🔑  Mi Clave",    "icon": "🔑", "label": "Mi Clave"},
-        {"key": "🚪  Salir",       "icon": "🚪", "label": "Salir"},
-    ]
-
-# Construir HTML de la barra móvil
-def build_mobile_nav(current, more_open_flag, more_items_list, is_admin_user):
-    # Ítem "más" activo si la sección actual está en more_items
-    more_keys = [m["key"] for m in more_items_list]
-    more_active = current in more_keys
-
-    nav_items_html = ""
-    for item in MOBILE_NAV_ITEMS:
-        if item["key"] == "__MORE__":
-            active_cls = "active" if more_active else ""
-            nav_items_html += f"""
-            <button class='mobile-nav-item {active_cls}' onclick='mobileMoreToggle()' style='background:transparent;border:none;cursor:pointer;'>
-                <span class='nav-icon'>{item["icon"]}</span>
-                <span class='nav-label'>{item["label"]}</span>
-            </button>"""
-        else:
-            active_cls = "active" if current == item["key"] else ""
-            nav_items_html += f"""
-            <button class='mobile-nav-item {active_cls}' onclick='mobileNav("{item["key"]}")' style='background:transparent;border:none;cursor:pointer;'>
-                <span class='nav-icon'>{item["icon"]}</span>
-                <span class='nav-label'>{item["label"]}</span>
-            </button>"""
-
-    more_menu_html = ""
-    for mi in more_items_list:
-        active_cls2 = "active-item" if current == mi["key"] else ""
-        more_menu_html += f"""
-        <div class='more-menu-item {active_cls2}' onclick='mobileNav("{mi["key"]}")'>
-            <span style='font-size:1.1rem;'>{mi["icon"]}</span>
-            <span>{mi["label"]}</span>
-        </div>"""
-
-    more_display = "block" if more_open_flag else "none"
-
-    # Indicador de modo activo en móvil
-    modo_actual = st.session_state.get('modo')
-    if modo_actual:
-        modo_badge_txt = "👤 PERFILES" if modo_actual == 'PERFILES' else "📧 CUENTAS"
-        modo_badge = f"""
-        <div style='position:fixed;top:8px;right:12px;z-index:9997;
-            background:rgba(99,102,241,0.2);border:1px solid rgba(99,102,241,0.4);
-            border-radius:20px;padding:5px 12px;font-size:0.7rem;font-weight:700;
-            color:#A5B4FC;letter-spacing:0.05em;backdrop-filter:blur(10px);
-            display:none;' id='modo-badge-mobile'>
-            {modo_badge_txt}
-        </div>"""
-    else:
-        modo_badge = ""
-
-    return f"""
-    {modo_badge}
-    <div id='mobile-more-overlay' onclick='closeMobileMore()'
-        style='display:{more_display};position:fixed;inset:0;z-index:9997;'></div>
-    <div id='mobile-more-menu' class='mobile-more-menu {"open" if more_open_flag else ""}'>
-        {more_menu_html}
-        <div class='divider' style='margin:6px 0;'></div>
-        <div class='more-menu-item' onclick='mobileCambiarModo()'>
-            <span style='font-size:1.1rem;'>⇄</span>
-            <span>Cambiar Modo</span>
-        </div>
+if modo_actual:
+    modo_badge_html = f"""
+    <div class="drawer-modo">
+        <div class="drawer-modo-label">Modo activo</div>
+        <div class="drawer-modo-value">{"👤 Perfiles" if modo_actual == "PERFILES" else "📧 Cuentas Completas"}</div>
     </div>
-    <nav class='mobile-nav'>
-        <div class='mobile-nav-inner'>
-            {nav_items_html}
-        </div>
-    </nav>
-    <script>
-    function mobileNav(key) {{
-        // Cerrar menú "más"
-        document.getElementById('mobile-more-menu').classList.remove('open');
-        document.getElementById('mobile-more-overlay').style.display = 'none';
-        // Enviar al servidor via query param usando streamlit
-        const params = new URLSearchParams(window.location.search);
-        params.set('mobile_nav', encodeURIComponent(key));
-        window.location.search = params.toString();
-    }}
-    function mobileMoreToggle() {{
-        const menu = document.getElementById('mobile-more-menu');
-        const overlay = document.getElementById('mobile-more-overlay');
-        const isOpen = menu.classList.contains('open');
-        if (isOpen) {{
-            menu.classList.remove('open');
-            overlay.style.display = 'none';
-        }} else {{
-            menu.classList.add('open');
-            overlay.style.display = 'block';
-        }}
-    }}
-    function closeMobileMore() {{
-        document.getElementById('mobile-more-menu').classList.remove('open');
-        document.getElementById('mobile-more-overlay').style.display = 'none';
-    }}
-    function mobileCambiarModo() {{
-        closeMobileMore();
-        const params = new URLSearchParams(window.location.search);
-        params.set('mobile_nav', encodeURIComponent('__CAMBIAR_MODO__'));
-        window.location.search = params.toString();
-    }}
-    // Mostrar badge de modo en móvil si existe
-    if (window.innerWidth <= 768) {{
-        const badge = document.getElementById('modo-badge-mobile');
-        if (badge) badge.style.display = 'block';
-    }}
-    </script>
+    """
+    cambiar_modo_item = f"""
+    <div class="drawer-menu-item" onclick="drawerNav('__CAMBIAR_MODO__')">
+        <span class="item-icon">⇄</span>
+        <span>Cambiar Modo</span>
+    </div>
+    <div class="drawer-divider"></div>
+    """
+else:
+    modo_badge_html = ""
+    cambiar_modo_item = ""
+
+# Construir items del menú
+menu_items_html = ""
+for item in MENU_ITEMS:
+    # Extraer icono y texto
+    parts = item.split("  ", 1)
+    icono = parts[0] if len(parts) > 0 else "•"
+    texto = parts[1] if len(parts) > 1 else item
+    active_cls = "active" if current_menu_mobile == item else ""
+    menu_items_html += f"""
+    <div class="drawer-menu-item {active_cls}" onclick="drawerNav('{item}')">
+        <span class="item-icon">{icono}</span>
+        <span>{texto}</span>
+    </div>
     """
 
-# Leer query params para navegación móvil
-try:
-    qp = st.query_params
-    mobile_nav_param = qp.get("mobile_nav", None)
-    if mobile_nav_param:
-        decoded = urllib.parse.unquote(mobile_nav_param)
-        if decoded == '__CAMBIAR_MODO__':
-            st.session_state['modo'] = None
-            st.query_params.clear()
-            st.rerun()
-        elif decoded in MENU_ITEMS:
-            st.session_state['mobile_menu'] = decoded
-            st.query_params.clear()
-            st.rerun()
-except Exception:
-    pass
+drawer_html = f"""
+<!-- BOTÓN HAMBURGUESA -->
+<button id="mobile-hamburger-btn" onclick="openDrawer()" aria-label="Menú">
+    ☰
+</button>
 
-# Inyectar barra móvil
-st.markdown(
-    build_mobile_nav(
-        current_mobile,
-        more_open,
-        more_items,
-        es_admin
-    ),
-    unsafe_allow_html=True
-)
+<!-- OVERLAY -->
+<div id="mobile-overlay" onclick="closeDrawer()"></div>
 
-# Resolver menú activo: en móvil tiene prioridad mobile_menu cuando viene de la barra
-# Usamos el último que fue actualizado. Como streamlit no detecta viewport,
-# dejamos que ambas fuentes coexistan — el usuario en móvil usará la barra,
-# en desktop usará el sidebar.
-# La variable `menu` se define como la unión: si mobile_menu fue cambiado
-# recientemente (via query param) lo usamos; si no, el sidebar.
-menu = current_mobile if st.session_state.get('_last_nav_source') == 'mobile' else menu_sidebar
+<!-- DRAWER LATERAL -->
+<div id="mobile-drawer">
+    <div class="drawer-header">
+        <span class="drawer-logo">▶ STREAMING VIP</span>
+        <div class="drawer-close" onclick="closeDrawer()">✕</div>
+    </div>
+    
+    <div class="drawer-user">
+        <div class="drawer-user-name">👤 {u_nom_m}</div>
+        <div class="drawer-user-role">{rango_label_m}</div>
+    </div>
+    
+    {modo_badge_html}
+    
+    <div class="drawer-menu">
+        {cambiar_modo_item}
+        {menu_items_html}
+    </div>
+</div>
 
-# Detectar fuente de navegación
-if 'mobile_menu' in st.session_state:
-    # Si mobile_menu y sidebar_menu apuntan a lo mismo no importa
-    # Simplificamos: usamos siempre mobile_menu como fuente canónica en móvil
-    # Para desktop el sidebar_menu tiene el mismo valor la mayor parte del tiempo
-    # Sincronizamos: si el sidebar cambió, actualizar mobile_menu
-    if menu_sidebar != st.session_state.get('_last_sidebar', menu_sidebar):
-        st.session_state['mobile_menu'] = menu_sidebar
-        st.session_state['_last_nav_source'] = 'sidebar'
-    st.session_state['_last_sidebar'] = menu_sidebar
+<script>
+(function() {{
+    function openDrawer() {{
+        var drawer = document.getElementById('mobile-drawer');
+        var overlay = document.getElementById('mobile-overlay');
+        if (drawer) {{
+            drawer.classList.add('open');
+            if (overlay) overlay.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }}
+    }}
+    
+    function closeDrawer() {{
+        var drawer = document.getElementById('mobile-drawer');
+        var overlay = document.getElementById('mobile-overlay');
+        if (drawer) {{
+            drawer.classList.remove('open');
+            if (overlay) overlay.style.display = 'none';
+            document.body.style.overflow = '';
+        }}
+    }}
+    
+    function drawerNav(key) {{
+        closeDrawer();
+        setTimeout(function() {{
+            var params = new URLSearchParams(window.location.search);
+            params.set('mnav', encodeURIComponent(key));
+            var newUrl = window.location.pathname + '?' + params.toString();
+            window.location.href = newUrl;
+        }}, 250);
+    }}
+    
+    // Exponer funciones globalmente
+    window.openDrawer = openDrawer;
+    window.closeDrawer = closeDrawer;
+    window.drawerNav = drawerNav;
+    
+    // Swipe para cerrar drawer
+    var startX = 0;
+    document.addEventListener('touchstart', function(e) {{
+        startX = e.touches[0].clientX;
+    }}, {{passive: true}});
+    document.addEventListener('touchend', function(e) {{
+        var endX = e.changedTouches[0].clientX;
+        var drawer = document.getElementById('mobile-drawer');
+        if (drawer && drawer.classList.contains('open') && (startX - endX) > 80) {{
+            closeDrawer();
+        }}
+    }}, {{passive: true}});
+}})();
+</script>
+"""
 
-# Menú final: usamos sidebar_menu como fuente de verdad para desktop,
-# y mobile_menu para móvil. Como no podemos detectar el viewport en Python,
-# dejamos que el JS redirija via query param cuando es móvil.
-# En la práctica: mobile_menu se actualiza via query param (JS), sidebar_menu via widget.
-# Tomamos el más reciente.
-menu = st.session_state.get('mobile_menu', menu_sidebar)
-# Si el sidebar fue cambiado manualmente, sincronizar
-if menu_sidebar != menu and st.session_state.get('_last_sidebar_val') != menu_sidebar:
-    menu = menu_sidebar
+st.markdown(drawer_html, unsafe_allow_html=True)
+
+# ══════════════════════════════════════════
+# RESOLVER MENÚ ACTIVO
+# ══════════════════════════════════════════
+# Sincronizar: si el sidebar cambió, actualizar mobile_menu
+if menu_sidebar != st.session_state.get('_last_sidebar_val', menu_sidebar):
     st.session_state['mobile_menu'] = menu_sidebar
 st.session_state['_last_sidebar_val'] = menu_sidebar
+
+# El menú activo es sidebar en desktop, mobile_menu en móvil
+# Como no podemos detectar el viewport en Python, usamos mobile_menu
+# que se sincroniza con sidebar cuando este cambia
+menu = st.session_state.get('mobile_menu', menu_sidebar)
+# Si sidebar fue cambiado manualmente (diferente al mobile_menu), sincronizar
+if menu_sidebar != menu:
+    menu = menu_sidebar
+    st.session_state['mobile_menu'] = menu_sidebar
 
 # ══════════════════════════════════════════
 # SELECTOR DE MODO
