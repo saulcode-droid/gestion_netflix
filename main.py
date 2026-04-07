@@ -1,236 +1,222 @@
 import streamlit as st
 import sqlite3
 import hashlib
-import pandas as pd
 from datetime import datetime, timedelta
-import urllib.parse
+import pandas as pd
 
-# ---------------- CONFIG ----------------
 st.set_page_config(page_title="STREAMING PRO", layout="wide")
 
-DB = "streaming.db"
-
-def db():
-    return sqlite3.connect(DB, check_same_thread=False)
-
-def hash_pass(p):
-    return hashlib.sha256(p.encode()).hexdigest()
-
-conn = db()
+# =========================
+# BASE DE DATOS (CORREGIDO)
+# =========================
+conn = sqlite3.connect("streaming_pro.db", check_same_thread=False)
 c = conn.cursor()
 
-# ---------------- DB ----------------
-c.execute('''CREATE TABLE IF NOT EXISTS usuarios (
-id INTEGER PRIMARY KEY,
+c.execute("""
+CREATE TABLE IF NOT EXISTS usuarios(
+id INTEGER PRIMARY KEY AUTOINCREMENT,
 user TEXT UNIQUE,
-password TEXT
-)''')
+password TEXT,
+rango TEXT DEFAULT 'USER'
+)
+""")
 
-c.execute('''CREATE TABLE IF NOT EXISTS cuentas (
-id INTEGER PRIMARY KEY,
+c.execute("""
+CREATE TABLE IF NOT EXISTS cuentas(
+id INTEGER PRIMARY KEY AUTOINCREMENT,
 plataforma TEXT,
 email TEXT,
 password TEXT,
 precio REAL,
-estado TEXT DEFAULT 'LIBRE',
+estado TEXT,
 fecha_vence TEXT,
-cliente TEXT
-)''')
+cliente TEXT,
+whatsapp TEXT
+)
+""")
 
 conn.commit()
 
-# ADMIN DEFAULT
-c.execute("SELECT * FROM usuarios WHERE user='admin'")
-if not c.fetchone():
-    c.execute("INSERT INTO usuarios (user,password) VALUES (?,?)",
-              ("admin", hash_pass("admin123")))
-    conn.commit()
+# =========================
+# FUNCIONES
+# =========================
+def hash_pass(p):
+    return hashlib.sha256(p.encode()).hexdigest()
 
-# ---------------- CSS ----------------
+# =========================
+# CSS PRO (CARDS GRANDES)
+# =========================
 st.markdown("""
 <style>
-.stApp {background: linear-gradient(135deg,#020617,#0f172a);}
 
-.title {
-text-align:center;
-font-size:42px;
-font-weight:900;
-background: linear-gradient(90deg,#00f5ff,#00ff85);
--webkit-background-clip:text;
--webkit-text-fill-color:transparent;
+.stApp {background: #0a0f1f; color:white;}
+
+.card {
+    background: linear-gradient(145deg,#111827,#1f2937);
+    border-radius: 20px;
+    padding: 40px;
+    text-align:center;
+    transition:0.3s;
+    border:1px solid #1f2937;
+    cursor:pointer;
+}
+.card:hover {
+    transform:scale(1.05);
+    box-shadow:0 0 25px #00ffc3;
 }
 
-.btn button {
-height:120px;
-width:100%;
-border-radius:15px;
-font-size:18px;
-font-weight:bold;
-background:#111827;
-color:white;
-border:1px solid rgba(255,255,255,0.1);
+.big-btn button {
+    height:160px;
+    width:100%;
+    border-radius:20px;
+    font-size:20px;
+    font-weight:bold;
+    background:linear-gradient(135deg,#00ffc3,#0066ff);
+    color:white;
 }
-.btn button:hover {
-transform:scale(1.05);
-box-shadow:0 0 20px cyan;
-}
+
 </style>
 """, unsafe_allow_html=True)
 
-# ---------------- SESSION ----------------
-if "auth" not in st.session_state:
-    st.session_state.auth = False
-if "step" not in st.session_state:
-    st.session_state.step = "login"
-if "modulo" not in st.session_state:
-    st.session_state.modulo = None
+# =========================
+# SESSION
+# =========================
+if "login" not in st.session_state:
+    st.session_state.login = False
+if "menu" not in st.session_state:
+    st.session_state.menu = "home"
 
-# ---------------- LOGIN ----------------
-if not st.session_state.auth:
-    st.markdown("<div class='title'>LOGIN</div>", unsafe_allow_html=True)
+# =========================
+# LOGIN + REGISTER
+# =========================
+if not st.session_state.login:
 
-    col1,col2,col3 = st.columns([1,1,1])
+    col1,col2 = st.columns(2)
+
+    with col1:
+        st.subheader("🔐 Login")
+        u = st.text_input("Usuario")
+        p = st.text_input("Password", type="password")
+
+        if st.button("Entrar"):
+            res = c.execute("SELECT * FROM usuarios WHERE user=?",(u,)).fetchone()
+            if res and res[2] == hash_pass(p):
+                st.session_state.login = True
+                st.session_state.user = u
+                st.rerun()
+            else:
+                st.error("Datos incorrectos")
 
     with col2:
-        tab1, tab2 = st.tabs(["LOGIN","REGISTRO"])
+        st.subheader("📝 Registro")
+        u2 = st.text_input("Nuevo usuario")
+        p2 = st.text_input("Nueva contraseña", type="password")
 
-        with tab1:
-            u = st.text_input("Usuario")
-            p = st.text_input("Contraseña", type="password")
-
-            if st.button("Ingresar"):
-                c.execute("SELECT * FROM usuarios WHERE user=?", (u,))
-                r = c.fetchone()
-                if r and r[2] == hash_pass(p):
-                    st.session_state.auth = True
-                    st.session_state.step = "panel"
-                    st.rerun()
-                else:
-                    st.error("Datos incorrectos")
-
-        with tab2:
-            nu = st.text_input("Nuevo usuario")
-            np = st.text_input("Nueva contraseña", type="password")
-
-            if st.button("Registrar"):
-                try:
-                    c.execute("INSERT INTO usuarios (user,password) VALUES (?,?)",
-                              (nu, hash_pass(np)))
-                    conn.commit()
-                    st.success("Registrado")
-                except:
-                    st.error("Usuario existe")
+        if st.button("Registrar"):
+            try:
+                c.execute("INSERT INTO usuarios(user,password) VALUES (?,?)",(u2,hash_pass(p2)))
+                conn.commit()
+                st.success("Registrado, espera aprobación ADMIN")
+            except:
+                st.error("Usuario ya existe")
 
     st.stop()
 
-# ---------------- PANEL ----------------
-st.markdown("<div class='title'>PANEL PRO</div>", unsafe_allow_html=True)
+# =========================
+# MENU PRINCIPAL PRO
+# =========================
+st.title("🔥 PANEL PRO")
 
-menu = [
-    "➕ SUBIR",
-    "💸 VENDER",
-    "📦 CUENTAS",
-    "🔔 NOTIFICAR",
-    "💰 FINANZAS"
-]
+col1,col2,col3,col4 = st.columns(4)
 
-cols = st.columns(5)
+with col1:
+    if st.button("➕ SUBIR", key="subir"):
+        st.session_state.menu="subir"
 
-for i,m in enumerate(menu):
-    with cols[i]:
-        st.markdown("<div class='btn'>", unsafe_allow_html=True)
-        if st.button(m):
-            st.session_state.modulo = m
-        st.markdown("</div>", unsafe_allow_html=True)
+with col2:
+    if st.button("💰 VENDER", key="vender"):
+        st.session_state.menu="vender"
 
-st.write("---")
+with col3:
+    if st.button("📦 CUENTAS", key="cuentas"):
+        st.session_state.menu="cuentas"
 
-mod = st.session_state.modulo
+with col4:
+    if st.button("📊 FINANZAS", key="fin"):
+        st.session_state.menu="finanzas"
 
-# ---------------- SUBIR ----------------
-if mod == "➕ SUBIR":
-    st.subheader("Subir cuenta")
+# =========================
+# SUBIR (ARREGLADO ERROR)
+# =========================
+if st.session_state.menu=="subir":
 
-    with st.form("subir"):
-        plat = st.selectbox("Plataforma", ["NETFLIX","DISNEY","PRIME"])
-        email = st.text_input("Correo")
-        password = st.text_input("Clave")
-        precio = st.number_input("Precio")
+    st.header("➕ Subir Cuenta")
 
-        if st.form_submit_button("Guardar"):
-            vence = datetime.now() + timedelta(days=30)
+    plataforma = st.selectbox("Plataforma",["Netflix","Disney","Prime","HBO"])
+    email = st.text_input("Email")
+    password = st.text_input("Password")
+    precio = st.number_input("Precio",0.0)
+    dias = st.number_input("Duración días",30)
 
-            c.execute("INSERT INTO cuentas VALUES (NULL,?,?,?,?,?,?,?)",
-                      (plat,email,password,precio,"LIBRE",
-                       vence.strftime("%Y-%m-%d"),""))
-            conn.commit()
-            st.success("Cuenta guardada")
+    if st.button("Guardar Cuenta"):
 
-# ---------------- VENDER ----------------
-elif mod == "💸 VENDER":
+        fecha = datetime.now() + timedelta(days=dias)
+
+        c.execute("""
+        INSERT INTO cuentas(plataforma,email,password,precio,estado,fecha_vence,cliente,whatsapp)
+        VALUES (?,?,?,?,?,?,?,?)
+        """,(plataforma,email,password,precio,"LIBRE",fecha.strftime("%Y-%m-%d"),"", ""))
+
+        conn.commit()
+        st.success("Cuenta guardada")
+
+# =========================
+# VENDER (FUNCIONAL)
+# =========================
+if st.session_state.menu=="vender":
+
+    st.header("💰 Vender Cuenta")
+
     df = pd.read_sql("SELECT * FROM cuentas WHERE estado='LIBRE'", conn)
 
     if df.empty:
         st.warning("No hay cuentas disponibles")
     else:
-        cuenta = st.selectbox("Cuenta", df["email"])
-        cliente = st.text_input("WhatsApp cliente")
+        sel = st.selectbox("Seleccionar cuenta", df["email"])
 
-        if st.button("VENDER AHORA"):
-            fecha = datetime.now() + timedelta(days=30)
+        cliente = st.text_input("Nombre cliente")
+        whatsapp = st.text_input("WhatsApp")
 
-            c.execute("UPDATE cuentas SET estado='OCUPADO', cliente=?, fecha_vence=? WHERE email=?",
-                      (cliente, fecha.strftime("%Y-%m-%d"), cuenta))
+        if st.button("Vender"):
+
+            c.execute("""
+            UPDATE cuentas 
+            SET estado='OCUPADO', cliente=?, whatsapp=? 
+            WHERE email=?
+            """,(cliente,whatsapp,sel))
+
             conn.commit()
-
-            msg = f"Cuenta: {cuenta} - 30 días"
-            url = f"https://wa.me/{cliente}?text={urllib.parse.quote(msg)}"
-
             st.success("Venta realizada")
-            st.markdown(f"[Enviar WhatsApp]({url})")
 
-# ---------------- CUENTAS ----------------
-elif mod == "📦 CUENTAS":
+# =========================
+# CUENTAS
+# =========================
+if st.session_state.menu=="cuentas":
+
+    st.header("📦 Todas las cuentas")
+
     df = pd.read_sql("SELECT * FROM cuentas", conn)
+    st.dataframe(df, use_container_width=True)
 
-    for _,r in df.iterrows():
-        st.write(r["email"], r["estado"], r["fecha_vence"])
+# =========================
+# FINANZAS
+# =========================
+if st.session_state.menu=="finanzas":
 
-        c1,c2 = st.columns(2)
+    st.header("📊 Finanzas")
 
-        with c1:
-            if st.button(f"Renovar {r['id']}"):
-                nueva = datetime.now() + timedelta(days=30)
-                c.execute("UPDATE cuentas SET fecha_vence=? WHERE id=?",
-                          (nueva.strftime("%Y-%m-%d"), r["id"]))
-                conn.commit()
-                st.rerun()
-
-        with c2:
-            if st.button(f"Cortar {r['id']}"):
-                c.execute("UPDATE cuentas SET estado='LIBRE', cliente='' WHERE id=?",(r["id"],))
-                conn.commit()
-                st.rerun()
-
-# ---------------- NOTIFICAR ----------------
-elif mod == "🔔 NOTIFICAR":
     df = pd.read_sql("SELECT * FROM cuentas WHERE estado='OCUPADO'", conn)
 
-    hoy = datetime.now()
+    total = df["precio"].sum()
 
-    for _,r in df.iterrows():
-        vence = datetime.strptime(r["fecha_vence"], "%Y-%m-%d")
-        dias = (vence - hoy).days
-
-        if dias <= 3:
-            msg = f"Tu cuenta vence en {dias} días"
-            url = f"https://wa.me/{r['cliente']}?text={urllib.parse.quote(msg)}"
-
-            st.warning(f"{r['email']} vence en {dias} días")
-            st.markdown(f"[Notificar]({url})")
-
-# ---------------- FINANZAS ----------------
-elif mod == "💰 FINANZAS":
-    df = pd.read_sql("SELECT * FROM cuentas", conn)
-    ingresos = df[df["estado"]=="OCUPADO"]["precio"].sum()
-    st.metric("Ingresos", ingresos or 0)
+    st.metric("Ingresos Totales", f"S/ {total}")
