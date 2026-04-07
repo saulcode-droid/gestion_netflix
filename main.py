@@ -9,7 +9,7 @@ import hashlib
 st.set_page_config(page_title="STREAMING VIP", page_icon="▶", layout="wide")
 
 # --- BASE DE DATOS ---
-DB_NAME = 'db_streaming_v15.db'
+DB_NAME = 'db_streaming_v16.db'
 
 def get_db():
     return sqlite3.connect(DB_NAME, check_same_thread=False)
@@ -32,6 +32,9 @@ def init_db():
                        whatsapp TEXT, fecha_vence TEXT, precio_venta REAL DEFAULT 0,
                        costo REAL DEFAULT 0, estado TEXT DEFAULT 'DISPONIBLE',
                        creador_id INTEGER, fecha_venta TEXT, fecha_proveedor TEXT)''')
+    cursor.execute('''CREATE TABLE IF NOT EXISTS clientes
+                      (id INTEGER PRIMARY KEY, nombre TEXT, whatsapp TEXT UNIQUE, 
+                       nota TEXT, creador_id INTEGER, fecha_registro TEXT)''')
     cursor.execute("INSERT OR IGNORE INTO usuarios (user, password, rango) VALUES ('admin', ?, 'ADMIN_GLOBAL')", (hash_pass('admin123'),))
     conn.commit()
 
@@ -45,7 +48,6 @@ st.markdown("""
 * { font-family: 'DM Sans', sans-serif; }
 #MainMenu, footer, header { visibility: hidden; }
 
-/* ── FONDO ── */
 .stApp {
     background: #060810;
     background-image:
@@ -55,7 +57,6 @@ st.markdown("""
     color: #E2E8F0;
 }
 
-/* ── SIDEBAR ── */
 section[data-testid="stSidebar"] {
     background: #09090F !important;
     border-right: 1px solid rgba(255,255,255,0.06) !important;
@@ -78,7 +79,6 @@ section[data-testid="stSidebar"] .stRadio label:hover {
     color: #C4B5FD !important;
 }
 
-/* ── TIPOGRAFIA ── */
 .title-main {
     font-family: 'Syne', sans-serif;
     font-size: 2rem;
@@ -99,7 +99,6 @@ section[data-testid="stSidebar"] .stRadio label:hover {
     margin-bottom: 1.8rem;
 }
 
-/* ── METRICAS ── */
 div[data-testid="stMetric"] {
     background: linear-gradient(145deg, #0D0F1A 0%, #111320 100%) !important;
     border: 1px solid rgba(255,255,255,0.07) !important;
@@ -129,7 +128,6 @@ div[data-testid="stMetric"] [data-testid="stMetricValue"] {
     font-weight: 700 !important; font-family: 'Syne', sans-serif !important; 
 }
 
-/* ── BOTONES BASE ── */
 .stButton > button {
     background: linear-gradient(145deg, #13172A 0%, #0D1020 100%) !important;
     color: #CBD5E1 !important;
@@ -152,7 +150,6 @@ div[data-testid="stMetric"] [data-testid="stMetricValue"] {
 }
 .stButton > button:active { transform: translateY(0) scale(0.99) !important; }
 
-/* ── BOTONES PLATAFORMA ── */
 .plat-btn-NETFLIX .stButton > button { color: #FF6B7A !important; border-color: rgba(229,9,20,0.25) !important; }
 .plat-btn-NETFLIX .stButton > button:hover { background: linear-gradient(145deg, #4A0909, #7B0D0D) !important; color: #FCA5A5 !important; border-color: #E50914 !important; box-shadow: 0 8px 24px rgba(229,9,20,0.3) !important; }
 .plat-btn-MAX .stButton > button { color: #C084FC !important; border-color: rgba(123,44,191,0.25) !important; }
@@ -166,7 +163,6 @@ div[data-testid="stMetric"] [data-testid="stMetricValue"] {
 .plat-btn-CRUNCHY .stButton > button { color: #FDA663 !important; border-color: rgba(244,117,33,0.25) !important; }
 .plat-btn-CRUNCHY .stButton > button:hover { background: linear-gradient(145deg, #3D1A02, #7B3202) !important; color: #FDE68A !important; border-color: #F47521 !important; box-shadow: 0 8px 24px rgba(244,117,33,0.3) !important; }
 
-/* ── BOTONES PLATAFORMA ACTIVOS ── */
 .plat-active-NETFLIX .stButton > button { background: linear-gradient(145deg, #4A0909, #7B0D0D) !important; color: #FCA5A5 !important; border-color: #E50914 !important; box-shadow: 0 4px 16px rgba(229,9,20,0.3) !important; }
 .plat-active-MAX .stButton > button { background: linear-gradient(145deg, #2E1065, #4C1D95) !important; color: #E9D5FF !important; border-color: #7B2CBF !important; box-shadow: 0 4px 16px rgba(123,44,191,0.3) !important; }
 .plat-active-PRIME .stButton > button { background: linear-gradient(145deg, #0C2436, #0E3D5C) !important; color: #A5F3FC !important; border-color: #00A8E1 !important; box-shadow: 0 4px 16px rgba(0,168,225,0.3) !important; }
@@ -174,7 +170,6 @@ div[data-testid="stMetric"] [data-testid="stMetricValue"] {
 .plat-active-VIX .stButton > button { background: linear-gradient(145deg, #431407, #7C2D12) !important; color: #FED7AA !important; border-color: #FF5A00 !important; box-shadow: 0 4px 16px rgba(255,90,0,0.3) !important; }
 .plat-active-CRUNCHY .stButton > button { background: linear-gradient(145deg, #3D1A02, #7B3202) !important; color: #FDE68A !important; border-color: #F47521 !important; box-shadow: 0 4px 16px rgba(244,117,33,0.3) !important; }
 
-/* ── BOTONES ACCION ── */
 .btn-sell .stButton > button { background: linear-gradient(135deg, #065F46, #047857) !important; border-color: rgba(16,185,129,0.4) !important; color: #6EE7B7 !important; }
 .btn-sell .stButton > button:hover { background: linear-gradient(135deg, #047857, #059669) !important; box-shadow: 0 8px 24px rgba(16,185,129,0.35) !important; color: #D1FAE5 !important; transform: translateY(-2px) scale(1.01) !important; }
 .btn-renew .stButton > button { background: linear-gradient(135deg, #1E1B4B, #2E2970) !important; border-color: rgba(99,102,241,0.4) !important; color: #A5B4FC !important; }
@@ -185,8 +180,9 @@ div[data-testid="stMetric"] [data-testid="stMetricValue"] {
 .btn-edit .stButton > button:hover { background: linear-gradient(135deg, #78350F, #92400E) !important; box-shadow: 0 8px 24px rgba(251,191,36,0.3) !important; color: #FEF08A !important; transform: translateY(-2px) scale(1.01) !important; }
 .btn-danger .stButton > button { background: linear-gradient(135deg, #450A0A, #7F1D1D) !important; border-color: rgba(239,68,68,0.35) !important; color: #FCA5A5 !important; }
 .btn-danger .stButton > button:hover { background: linear-gradient(135deg, #DC2626, #EF4444) !important; box-shadow: 0 8px 24px rgba(239,68,68,0.4) !important; color: white !important; transform: translateY(-2px) scale(1.02) !important; }
+.btn-client .stButton > button { background: linear-gradient(135deg, #0C2436, #0E3D5C) !important; border-color: rgba(6,182,212,0.4) !important; color: #67E8F9 !important; }
+.btn-client .stButton > button:hover { background: linear-gradient(135deg, #155E75, #0E7490) !important; box-shadow: 0 8px 24px rgba(6,182,212,0.3) !important; color: #A5F3FC !important; transform: translateY(-2px) scale(1.01) !important; }
 
-/* ── INPUTS ── */
 .stTextInput input, .stNumberInput input, .stDateInput input {
     background: #0D0F1A !important;
     border: 1px solid rgba(255,255,255,0.08) !important;
@@ -209,7 +205,6 @@ div[data-testid="stMetric"] [data-testid="stMetricValue"] {
 }
 label { color: #64748B !important; font-size: 0.8rem !important; font-weight: 500 !important; letter-spacing: 0.06em !important; }
 
-/* ── FORM ── */
 .stForm {
     background: linear-gradient(145deg, #0D0F1A, #0A0C15) !important;
     border: 1px solid rgba(255,255,255,0.06) !important;
@@ -218,7 +213,6 @@ label { color: #64748B !important; font-size: 0.8rem !important; font-weight: 50
     box-shadow: 0 4px 24px rgba(0,0,0,0.4) !important;
 }
 
-/* ── EXPANDER ── */
 .streamlit-expanderHeader {
     background: linear-gradient(145deg, #0D0F1A, #111320) !important;
     border: 1px solid rgba(255,255,255,0.07) !important;
@@ -235,7 +229,6 @@ label { color: #64748B !important; font-size: 0.8rem !important; font-weight: 50
     padding: 16px !important;
 }
 
-/* ── TARJETAS ── */
 .card {
     background: linear-gradient(145deg, #0D0F1A, #111320);
     border: 1px solid rgba(255,255,255,0.06);
@@ -251,32 +244,44 @@ label { color: #64748B !important; font-size: 0.8rem !important; font-weight: 50
 .badge-vendido { background: rgba(239,68,68,0.12); color: #F87171; border: 1px solid rgba(239,68,68,0.25); }
 .badge-disponible { background: rgba(16,185,129,0.12); color: #34D399; border: 1px solid rgba(16,185,129,0.25); }
 .badge-entregado { background: rgba(239,68,68,0.12); color: #F87171; border: 1px solid rgba(239,68,68,0.25); }
+.badge-cliente { background: rgba(6,182,212,0.12); color: #67E8F9; border: 1px solid rgba(6,182,212,0.25); }
 
-/* ── LOGIN ── */
+/* LOGIN HACKER */
 .login-wrap {
-    background: linear-gradient(145deg, #0C0E1A, #0A0C17);
-    border: 1px solid rgba(255,255,255,0.07);
+    background: linear-gradient(145deg, #040608, #070C0E);
+    border: 1px solid rgba(0,255,140,0.15);
     border-radius: 28px;
     padding: 52px 44px;
-    box-shadow: 0 50px 100px rgba(0,0,0,0.7);
+    box-shadow: 0 50px 100px rgba(0,0,0,0.85), 0 0 60px rgba(0,255,140,0.04);
     position: relative; overflow: hidden;
 }
 .login-wrap::before {
     content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
-    background: linear-gradient(90deg, transparent, #7C3AED, #06B6D4, transparent);
+    background: linear-gradient(90deg, transparent, #00FF8C, #00D4FF, transparent);
 }
-.login-logo {
-    width: 80px; height: 80px;
-    background: linear-gradient(135deg, #7C3AED 0%, #06B6D4 100%);
-    border-radius: 24px;
+.login-wrap::after {
+    content: '';
+    position: absolute;
+    top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background: radial-gradient(ellipse at center, rgba(0,255,140,0.03) 0%, transparent 60%);
+    pointer-events: none;
+}
+.login-logo-svg {
+    width: 100px; height: 100px;
+    margin: 0 auto 28px;
     display: flex; align-items: center; justify-content: center;
-    font-size: 2.2rem; margin: 0 auto 28px; text-align: center;
-    box-shadow: 0 16px 40px rgba(124,58,237,0.4);
+    filter: drop-shadow(0 0 20px rgba(0,255,140,0.5));
 }
-.login-title { font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 800; background: linear-gradient(135deg, #FFFFFF, #7C3AED); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-align: center; margin-bottom: 4px; }
-.login-sub { color: #374151; font-size: 0.78rem; text-align: center; margin-bottom: 36px; letter-spacing: 0.15em; text-transform: uppercase; }
+.login-title {
+    font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 800;
+    background: linear-gradient(135deg, #00FF8C, #00D4FF);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    text-align: center; margin-bottom: 4px;
+    text-shadow: none;
+}
+.login-sub { color: #1a3a2a; font-size: 0.78rem; text-align: center; margin-bottom: 36px; letter-spacing: 0.2em; text-transform: uppercase; font-family: 'DM Mono', monospace; }
 
-/* ── USER BADGE ── */
 .user-badge {
     background: linear-gradient(145deg, #0D0F1A, #111320);
     border: 1px solid rgba(255,255,255,0.07);
@@ -292,7 +297,6 @@ label { color: #64748B !important; font-size: 0.8rem !important; font-weight: 50
 .user-name { color: #F1F5F9 !important; font-weight: 700; font-size: 0.95rem; font-family: 'Syne', sans-serif; }
 .user-role { display: inline-block; margin-top: 6px; color: #7C3AED !important; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.15em; background: rgba(124,58,237,0.1); border: 1px solid rgba(124,58,237,0.2); border-radius: 6px; padding: 3px 10px; }
 
-/* ── MODO CARDS ── */
 .modo-card {
     background: linear-gradient(145deg, #0D0F1A, #111320);
     border: 1px solid rgba(255,255,255,0.07);
@@ -304,7 +308,6 @@ label { color: #64748B !important; font-size: 0.8rem !important; font-weight: 50
 .modo-title { font-family: 'Syne', sans-serif; color: #F1F5F9; font-weight: 800; font-size: 1.15rem; margin-bottom: 10px; }
 .modo-desc { color: #475569; font-size: 0.85rem; line-height: 1.6; }
 
-/* ── PLAT HEADER ── */
 .plat-header {
     display: flex; align-items: center; gap: 16px;
     background: linear-gradient(145deg, #0D0F1A, #111320);
@@ -313,17 +316,38 @@ label { color: #64748B !important; font-size: 0.8rem !important; font-weight: 50
 }
 .plat-dot { width: 12px; height: 12px; border-radius: 50%; }
 
-/* ── SEPARADORES ── */
 .divider { border: none; border-top: 1px solid rgba(255,255,255,0.05); margin: 24px 0; }
 .glow-divider { border: none; height: 1px; margin: 28px 0; background: linear-gradient(90deg, transparent, rgba(99,102,241,0.3), rgba(6,182,212,0.3), transparent); }
 
-/* ── KEY BOX ── */
 .key-box { background: #080A12; border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 10px 16px; color: #34D399; font-family: 'DM Mono', monospace; font-size: 0.88rem; margin-bottom: 14px; }
 
-/* ── DIAS ALERTA ── */
 .d-ok { color: #34D399; font-weight: 700; }
 .d-warn { color: #FBBF24; font-weight: 700; }
 .d-danger { color: #F87171; font-weight: 700; }
+
+/* CLIENTE CARD */
+.client-card {
+    background: linear-gradient(145deg, #080C18, #0D1020);
+    border: 1px solid rgba(6,182,212,0.15);
+    border-radius: 18px;
+    padding: 20px 24px;
+    margin: 10px 0;
+    transition: all 0.25s ease;
+}
+.client-card:hover { border-color: rgba(6,182,212,0.35); transform: translateY(-2px); box-shadow: 0 12px 32px rgba(6,182,212,0.1); }
+
+/* FINANCE FILTER TABS */
+.finance-tab {
+    background: linear-gradient(145deg, #0D0F1A, #111320);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 12px;
+    padding: 10px 18px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-weight: 600;
+    font-size: 0.82rem;
+}
 
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: #060810; }
@@ -354,8 +378,55 @@ PLATAFORMAS = {
     "CRUNCHY":  {"color": "#F47521", "emoji": "🍊"},
 }
 
+# SVG Hacker para login
+HACKER_SVG = """
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="100" height="100">
+  <defs>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#00FF8C" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#00FF8C" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="neon">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <!-- Glow background -->
+  <circle cx="60" cy="60" r="55" fill="url(#glow)"/>
+  <!-- Hood/body -->
+  <ellipse cx="60" cy="105" rx="38" ry="22" fill="#0a1a10" stroke="#00FF8C" stroke-width="1.2" opacity="0.9"/>
+  <!-- Hoodie shape -->
+  <path d="M22 95 Q30 65 42 58 Q50 54 60 54 Q70 54 78 58 Q90 65 98 95 Z" fill="#0d1f14" stroke="#00FF8C" stroke-width="1" opacity="0.95"/>
+  <!-- Hood -->
+  <path d="M36 62 Q38 30 60 28 Q82 30 84 62 Q72 55 60 55 Q48 55 36 62 Z" fill="#0a1a0f" stroke="#00FF8C" stroke-width="1.2"/>
+  <!-- Face shadow -->
+  <ellipse cx="60" cy="52" rx="17" ry="14" fill="#020804"/>
+  <!-- Eyes - glowing green -->
+  <ellipse cx="52" cy="50" rx="4" ry="3" fill="#00FF8C" filter="url(#neon)" opacity="0.95"/>
+  <ellipse cx="68" cy="50" rx="4" ry="3" fill="#00FF8C" filter="url(#neon)" opacity="0.95"/>
+  <!-- Eye pupils -->
+  <ellipse cx="52" cy="50" rx="2" ry="2" fill="#003318"/>
+  <ellipse cx="68" cy="50" rx="2" ry="2" fill="#003318"/>
+  <!-- Mask/lower face -->
+  <rect x="44" y="54" width="32" height="10" rx="5" fill="#0a1a10" stroke="#00FF8C" stroke-width="0.8"/>
+  <!-- Mask lines -->
+  <line x1="47" y1="57" x2="73" y2="57" stroke="#00FF8C" stroke-width="0.5" opacity="0.5"/>
+  <line x1="47" y1="60" x2="73" y2="60" stroke="#00FF8C" stroke-width="0.5" opacity="0.5"/>
+  <!-- Laptop/device -->
+  <rect x="32" y="88" width="56" height="6" rx="2" fill="#0d1f14" stroke="#00FF8C" stroke-width="0.8"/>
+  <rect x="36" y="80" width="48" height="10" rx="2" fill="#040d06" stroke="#00FF8C" stroke-width="0.8"/>
+  <!-- Code on screen -->
+  <text x="40" y="88" font-family="monospace" font-size="4" fill="#00FF8C" opacity="0.8">&gt;_ ACCESS</text>
+  <!-- Binary rain hints -->
+  <text x="18" y="40" font-family="monospace" font-size="5" fill="#00FF8C" opacity="0.2">01</text>
+  <text x="96" y="55" font-family="monospace" font-size="5" fill="#00FF8C" opacity="0.2">10</text>
+  <text x="14" y="70" font-family="monospace" font-size="4" fill="#00D4FF" opacity="0.15">11</text>
+  <text x="100" y="75" font-family="monospace" font-size="4" fill="#00D4FF" opacity="0.15">00</text>
+</svg>
+"""
+
 # --- SESSION STATE ---
-for k, v in [('auth', False), ('modo', None), ('p_sel', 'NETFLIX'), ('edit_perfil_id', None)]:
+for k, v in [('auth', False), ('modo', None), ('p_sel', 'NETFLIX'), ('edit_perfil_id', None), ('cliente_buscado', None)]:
     if k not in st.session_state: st.session_state[k] = v
 
 conn = get_db()
@@ -366,11 +437,11 @@ conn = get_db()
 if not st.session_state['auth']:
     _, col_log, _ = st.columns([1, 1.2, 1])
     with col_log:
-        st.markdown("""
+        st.markdown(f"""
         <div class='login-wrap'>
-            <div class='login-logo'>▶</div>
+            <div class='login-logo-svg'>{HACKER_SVG}</div>
             <div class='login-title'>STREAMING VIP</div>
-            <div class='login-sub'>Sistema de Gestión Profesional</div>
+            <div class='login-sub'>&gt;_ Sistema de Gestión Profesional</div>
         </div>
         """, unsafe_allow_html=True)
         st.write("")
@@ -386,7 +457,7 @@ if not st.session_state['auth']:
                 st.rerun()
             else:
                 st.error("Credenciales incorrectas.")
-        st.markdown("<div style='text-align:center;margin-top:20px;color:#374151;font-size:0.78rem;'>¿Problemas? Contacta a <b style='color:#7C3AED'>Saúl</b></div>", unsafe_allow_html=True)
+        st.markdown("<div style='text-align:center;margin-top:20px;color:#1a3a2a;font-family:DM Mono,monospace;font-size:0.75rem;'>¿Problemas? Contacta a <b style='color:#00FF8C'>Saúl</b></div>", unsafe_allow_html=True)
     st.stop()
 
 uid = st.session_state['u_id']
@@ -417,9 +488,9 @@ with st.sidebar:
         st.markdown("<div class='divider'></div>", unsafe_allow_html=True)
 
     if st.session_state['u_ran'] == 'ADMIN_GLOBAL':
-        menu = st.radio("", ["📊  Dashboard", "🌐  Plataformas", "📱  Gestión", "🔔  Alertas", "💰  Finanzas", "🗑️  Eliminar", "👥  Usuarios", "🚪  Salir"], label_visibility="collapsed")
+        menu = st.radio("", ["📊  Dashboard", "🌐  Plataformas", "📱  Gestión", "👥  Clientes", "🔔  Alertas", "💰  Finanzas", "🗑️  Eliminar", "🔐  Usuarios", "🚪  Salir"], label_visibility="collapsed")
     else:
-        menu = st.radio("", ["📊  Dashboard", "🌐  Plataformas", "📱  Gestión", "🔔  Alertas", "💰  Finanzas", "🔑  Mi Clave", "🚪  Salir"], label_visibility="collapsed")
+        menu = st.radio("", ["📊  Dashboard", "🌐  Plataformas", "📱  Gestión", "👥  Clientes", "🔔  Alertas", "💰  Finanzas", "🔑  Mi Clave", "🚪  Salir"], label_visibility="collapsed")
 
 # ══════════════════════════════════════════
 # SELECTOR DE MODO
@@ -468,19 +539,23 @@ if "📊" in menu:
         total_cuentas = pd.read_sql_query(f"SELECT COUNT(*) FROM cuentas WHERE creador_id={uid}", conn).iloc[0,0]
         vendidos = pd.read_sql_query(f"SELECT COUNT(*) FROM perfiles WHERE estado='VENDIDO' AND creador_id={uid}", conn).iloc[0,0]
         libres = pd.read_sql_query(f"SELECT COUNT(*) FROM perfiles WHERE estado='LIBRE' AND creador_id={uid}", conn).iloc[0,0]
-        c1,c2,c3,c4 = st.columns(4)
+        total_clientes = pd.read_sql_query(f"SELECT COUNT(*) FROM clientes WHERE creador_id={uid}", conn).iloc[0,0]
+        c1,c2,c3,c4,c5 = st.columns(5)
         c1.metric("📦 Cuentas Maestras", total_cuentas)
         c2.metric("✅ Perfiles Vendidos", vendidos)
         c3.metric("🔓 Perfiles Libres", libres)
         c4.metric("📊 Total Perfiles", vendidos + libres)
+        c5.metric("🧑 Clientes", total_clientes)
     else:
         total = pd.read_sql_query(f"SELECT COUNT(*) FROM cuentas_completas WHERE creador_id={uid}", conn).iloc[0,0]
         entregadas = pd.read_sql_query(f"SELECT COUNT(*) FROM cuentas_completas WHERE estado='ENTREGADA' AND creador_id={uid}", conn).iloc[0,0]
         disponibles = pd.read_sql_query(f"SELECT COUNT(*) FROM cuentas_completas WHERE estado='DISPONIBLE' AND creador_id={uid}", conn).iloc[0,0]
-        c1,c2,c3 = st.columns(3)
+        total_clientes = pd.read_sql_query(f"SELECT COUNT(*) FROM clientes WHERE creador_id={uid}", conn).iloc[0,0]
+        c1,c2,c3,c4 = st.columns(4)
         c1.metric("📦 Cuentas Totales", total)
         c2.metric("✅ Entregadas", entregadas)
         c3.metric("🔓 Disponibles", disponibles)
+        c4.metric("🧑 Clientes", total_clientes)
 
     st.markdown("<div class='glow-divider'></div>", unsafe_allow_html=True)
     st.markdown("### Actividad por plataforma")
@@ -626,7 +701,6 @@ elif "🌐" in menu:
 elif "📱" in menu:
     modo = st.session_state.get('modo', 'PERFILES')
 
-    # ─── MODO PERFILES ───
     if modo == 'PERFILES':
         st.markdown("<div class='title-main'>GESTIÓN DE PERFILES</div>", unsafe_allow_html=True)
         st.markdown("<div class='subtitle'>Administra, vende y renueva perfiles</div>", unsafe_allow_html=True)
@@ -667,7 +741,6 @@ elif "📱" in menu:
                 with st.expander(f"📧  {c['email']}"):
                     st.markdown(f"<div class='key-box'>🔑 &nbsp; {c['password']}</div>", unsafe_allow_html=True)
 
-                    # Agregar perfil
                     with st.expander("➕  Agregar nuevo perfil"):
                         np_c1, np_c2, np_c3 = st.columns(3)
                         nuevo_nombre = np_c1.text_input("Nombre del perfil", key=f"nn_{c['email']}")
@@ -689,7 +762,6 @@ elif "📱" in menu:
                         for _, row in perfs.iterrows():
                             estado_badge = "<span class='badge badge-libre'>LIBRE</span>" if row['estado'] == 'LIBRE' else "<span class='badge badge-vendido'>VENDIDO</span>"
 
-                            # Modo edición
                             if st.session_state.get('edit_perfil_id') == row['id']:
                                 st.markdown(f"<div style='background:rgba(99,102,241,0.06);border:1px solid rgba(99,102,241,0.2);border-radius:12px;padding:16px;margin:8px 0;'>", unsafe_allow_html=True)
                                 st.markdown(f"<div style='color:#A5B4FC;font-size:0.8rem;font-weight:700;letter-spacing:0.08em;margin-bottom:12px;'>✏️  EDITANDO: {row['nombre']}</div>", unsafe_allow_html=True)
@@ -707,7 +779,6 @@ elif "📱" in menu:
                                 st.markdown("</div>", unsafe_allow_html=True)
                                 continue
 
-                            # Vista normal
                             wa_str = f"📱 {row['whatsapp']}" if row['whatsapp'] and row['estado'] == 'VENDIDO' else ''
                             st.markdown(f"""<div class='card'>
                                 <div style='display:flex;align-items:center;gap:14px;flex-wrap:wrap;'>
@@ -731,6 +802,12 @@ elif "📱" in menu:
                                             conn.cursor().execute(
                                                 "UPDATE perfiles SET estado='VENDIDO',whatsapp=?,fecha_vence=?,precio_venta=?,fecha_venta=? WHERE id=?",
                                                 (wa_input, vence, precio_v, datetime.now().strftime("%d/%m/%Y"), row['id']))
+                                            # Auto-registrar cliente si no existe
+                                            try:
+                                                conn.cursor().execute(
+                                                    "INSERT OR IGNORE INTO clientes (whatsapp, nombre, creador_id, fecha_registro) VALUES (?,?,?,?)",
+                                                    (wa_input, wa_input, uid, datetime.now().strftime("%d/%m/%Y")))
+                                            except: pass
                                             conn.commit(); st.rerun()
                                         else: st.warning("Ingresa el WhatsApp")
                                     st.markdown("</div>", unsafe_allow_html=True)
@@ -773,8 +850,7 @@ elif "📱" in menu:
                                             box-shadow:0 4px 12px rgba(22,163,74,0.2);">💬 WA</div>
                                     </a>""", unsafe_allow_html=True)
 
-    # ─── MODO CUENTAS COMPLETAS ───
-    else:
+    else:  # CUENTAS COMPLETAS
         st.markdown("<div class='title-main'>GESTIÓN DE CUENTAS</div>", unsafe_allow_html=True)
         st.markdown("<div class='subtitle'>Entrega accesos completos a clientes</div>", unsafe_allow_html=True)
         st.markdown("<div class='glow-divider'></div>", unsafe_allow_html=True)
@@ -807,7 +883,6 @@ elif "📱" in menu:
             st.markdown("""<div style='text-align:center;padding:60px 20px;color:#374151;'>
                 <div style='font-size:3rem;margin-bottom:16px;'>📭</div>
                 <div style='font-weight:700;font-size:1rem;color:#64748B;'>Sin cuentas para esta plataforma</div>
-                <div style='font-size:0.85rem;margin-top:8px;'>Ve a "Plataformas" para agregar cuentas.</div>
             </div>""", unsafe_allow_html=True)
         else:
             for _, row in cuentas.iterrows():
@@ -831,6 +906,11 @@ elif "📱" in menu:
                                     conn.cursor().execute(
                                         "UPDATE cuentas_completas SET estado='ENTREGADA',whatsapp=?,fecha_vence=?,precio_venta=?,fecha_venta=? WHERE id=?",
                                         (wa_c, fecha_v.strftime("%d/%m/%Y"), precio_c, datetime.now().strftime("%d/%m/%Y"), row['id']))
+                                    try:
+                                        conn.cursor().execute(
+                                            "INSERT OR IGNORE INTO clientes (whatsapp, nombre, creador_id, fecha_registro) VALUES (?,?,?,?)",
+                                            (wa_c, wa_c, uid, datetime.now().strftime("%d/%m/%Y")))
+                                    except: pass
                                     conn.commit(); st.rerun()
                                 else: st.warning("Ingresa el WhatsApp del cliente")
                             st.markdown("</div>", unsafe_allow_html=True)
@@ -873,6 +953,157 @@ elif "📱" in menu:
                                     border-radius:12px;padding:10px;text-align:center;font-weight:700;font-size:0.82rem;
                                     box-shadow:0 4px 12px rgba(22,163,74,0.2);">💬 ENVIAR WA</div>
                             </a>""", unsafe_allow_html=True)
+
+# ══════════════════════════════════════════
+# CLIENTES
+# ══════════════════════════════════════════
+elif "👥" in menu and "🔐" not in menu:
+    st.markdown("<div class='title-main'>CLIENTES</div>", unsafe_allow_html=True)
+    st.markdown("<div class='subtitle'>Administra tus clientes y sus servicios</div>", unsafe_allow_html=True)
+    st.markdown("<div class='glow-divider'></div>", unsafe_allow_html=True)
+    modo = st.session_state.get('modo', 'PERFILES')
+
+    # Buscador principal
+    st.markdown("""<div style='background:linear-gradient(145deg,#080C18,#0D1020);border:1px solid rgba(6,182,212,0.2);border-radius:18px;padding:22px 24px;margin-bottom:24px;'>
+        <div style='color:#67E8F9;font-weight:700;font-size:0.85rem;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:14px;'>🔍 Buscador de Clientes</div>
+    """, unsafe_allow_html=True)
+    busqueda = st.text_input("Buscar por número de WhatsApp o nombre", placeholder="Ej: 51987654321 o Juan...", label_visibility="collapsed")
+    st.markdown("</div>", unsafe_allow_html=True)
+
+    # Registrar nuevo cliente
+    with st.expander("➕  Registrar nuevo cliente"):
+        with st.form("nuevo_cliente"):
+            rc1, rc2, rc3 = st.columns(3)
+            c_nombre  = rc1.text_input("👤 Nombre del cliente")
+            c_wa      = rc2.text_input("📱 WhatsApp", placeholder="51987654321")
+            c_nota    = rc3.text_input("📝 Nota (opcional)")
+            if st.form_submit_button("✅  REGISTRAR CLIENTE", use_container_width=True):
+                if c_nombre and c_wa:
+                    try:
+                        conn.cursor().execute(
+                            "INSERT INTO clientes (nombre, whatsapp, nota, creador_id, fecha_registro) VALUES (?,?,?,?,?)",
+                            (c_nombre, c_wa, c_nota, uid, datetime.now().strftime("%d/%m/%Y")))
+                        conn.commit(); st.success(f"✅ Cliente {c_nombre} registrado.")
+                    except: st.error("❌ El número ya está registrado.")
+                else: st.warning("Completa nombre y WhatsApp.")
+
+    st.markdown("<div class='glow-divider'></div>", unsafe_allow_html=True)
+
+    # Obtener clientes según búsqueda
+    if busqueda:
+        clientes_df = pd.read_sql_query(
+            f"SELECT * FROM clientes WHERE creador_id={uid} AND (whatsapp LIKE '%{busqueda}%' OR nombre LIKE '%{busqueda}%') ORDER BY nombre",
+            conn)
+        if clientes_df.empty:
+            st.markdown(f"""<div style='text-align:center;padding:40px;'>
+                <div style='font-size:2.5rem;margin-bottom:12px;'>🔍</div>
+                <div style='color:#64748B;font-weight:600;'>Sin resultados para "{busqueda}"</div>
+            </div>""", unsafe_allow_html=True)
+    else:
+        clientes_df = pd.read_sql_query(f"SELECT * FROM clientes WHERE creador_id={uid} ORDER BY nombre", conn)
+
+    total_cli = len(clientes_df)
+    st.markdown(f"<div style='color:#475569;font-size:0.82rem;margin-bottom:16px;'>{total_cli} cliente{'s' if total_cli != 1 else ''} encontrado{'s' if total_cli != 1 else ''}</div>", unsafe_allow_html=True)
+
+    for _, cli in clientes_df.iterrows():
+        wa = cli['whatsapp']
+
+        # Contar servicios activos
+        if modo == 'PERFILES':
+            servicios_activos = pd.read_sql_query(
+                f"SELECT COUNT(*) FROM perfiles WHERE whatsapp='{wa}' AND estado='VENDIDO' AND creador_id={uid}", conn).iloc[0,0]
+        else:
+            servicios_activos = pd.read_sql_query(
+                f"SELECT COUNT(*) FROM cuentas_completas WHERE whatsapp='{wa}' AND estado='ENTREGADA' AND creador_id={uid}", conn).iloc[0,0]
+
+        color_badge = "#34D399" if servicios_activos > 0 else "#475569"
+
+        with st.expander(f"🧑 {cli['nombre']}  ·  📱 {wa}  ·  {'🟢 ' + str(servicios_activos) + ' servicio(s) activo(s)' if servicios_activos > 0 else '⚫ Sin servicios activos'}"):
+
+            # Info y edición del cliente
+            cc1, cc2, cc3 = st.columns([2, 2, 1])
+            nuevo_nombre_cli = cc1.text_input("Nombre", value=cli['nombre'], key=f"cln_{cli['id']}")
+            nuevo_wa_cli     = cc2.text_input("WhatsApp", value=wa, key=f"clw_{cli['id']}")
+            nueva_nota_cli   = cc1.text_input("Nota", value=cli.get('nota','') or '', key=f"clt_{cli['id']}")
+
+            with cc3:
+                st.write("")
+                st.write("")
+                st.markdown("<div class='btn-client'>", unsafe_allow_html=True)
+                if st.button("💾 Guardar", key=f"clsave_{cli['id']}", use_container_width=True):
+                    conn.cursor().execute("UPDATE clientes SET nombre=?, whatsapp=?, nota=? WHERE id=?",
+                                         (nuevo_nombre_cli, nuevo_wa_cli, nueva_nota_cli, cli['id']))
+                    conn.commit(); st.rerun()
+                st.markdown("</div>", unsafe_allow_html=True)
+                st.markdown("<div class='btn-danger'>", unsafe_allow_html=True)
+                if st.button("🗑️ Eliminar", key=f"cldel_{cli['id']}", use_container_width=True):
+                    conn.cursor().execute("DELETE FROM clientes WHERE id=?", (cli['id'],))
+                    conn.commit(); st.rerun()
+                st.markdown("</div>", unsafe_allow_html=True)
+
+            st.markdown("<div class='divider'></div>", unsafe_allow_html=True)
+
+            # Servicios asignados
+            if modo == 'PERFILES':
+                servicios = pd.read_sql_query(
+                    f"SELECT p.*, c.password as clave_maestra FROM perfiles p JOIN cuentas c ON p.email=c.email WHERE p.whatsapp='{wa}' AND p.creador_id={uid}",
+                    conn)
+                if not servicios.empty:
+                    st.markdown(f"<div style='color:#67E8F9;font-weight:700;font-size:0.82rem;letter-spacing:0.08em;margin-bottom:10px;'>📋 SERVICIOS CONTRATADOS ({len(servicios)})</div>", unsafe_allow_html=True)
+                    for _, sv in servicios.iterrows():
+                        info = PLATAFORMAS.get(sv['plataforma'], {"color":"#6366F1","emoji":"▶"})
+                        d = calcular_dias(sv['fecha_vence']) if sv.get('fecha_vence') else 0
+                        estado_color = "#34D399" if sv['estado'] == 'VENDIDO' else "#475569"
+                        st.markdown(f"""<div class='card' style='border-left:3px solid {info["color"]}44;margin:6px 0;'>
+                            <div style='display:flex;align-items:center;gap:12px;flex-wrap:wrap;'>
+                                <span style='font-size:1.3rem;'>{info["emoji"]}</span>
+                                <div style='flex:1;'>
+                                    <div style='color:#F1F5F9;font-weight:700;font-size:0.9rem;'>{sv['plataforma']} — Perfil: {sv['nombre']}</div>
+                                    <div style='color:#475569;font-size:0.78rem;margin-top:3px;'>
+                                        📧 {sv['email']} · PIN: <span style='color:#FBBF24;font-family:DM Mono,monospace;'>{sv['pin'] or '—'}</span>
+                                    </div>
+                                </div>
+                                <div style='text-align:right;'>
+                                    <div style='color:{estado_color};font-weight:700;font-size:0.82rem;'>{sv['estado']}</div>
+                                    <div style='font-size:0.78rem;margin-top:2px;'>{dias_html(d) if sv.get('fecha_vence') else ''}</div>
+                                </div>
+                            </div>
+                        </div>""", unsafe_allow_html=True)
+                else:
+                    st.markdown("<div style='color:#374151;text-align:center;padding:16px;font-size:0.88rem;'>Sin servicios de perfiles asignados.</div>", unsafe_allow_html=True)
+
+            else:
+                servicios = pd.read_sql_query(
+                    f"SELECT * FROM cuentas_completas WHERE whatsapp='{wa}' AND creador_id={uid}", conn)
+                if not servicios.empty:
+                    st.markdown(f"<div style='color:#67E8F9;font-weight:700;font-size:0.82rem;letter-spacing:0.08em;margin-bottom:10px;'>📋 CUENTAS ASIGNADAS ({len(servicios)})</div>", unsafe_allow_html=True)
+                    for _, sv in servicios.iterrows():
+                        info = PLATAFORMAS.get(sv['plataforma'], {"color":"#6366F1","emoji":"▶"})
+                        d = calcular_dias(sv['fecha_vence']) if sv.get('fecha_vence') else 0
+                        st.markdown(f"""<div class='card' style='border-left:3px solid {info["color"]}44;margin:6px 0;'>
+                            <div style='display:flex;align-items:center;gap:12px;flex-wrap:wrap;'>
+                                <span style='font-size:1.3rem;'>{info["emoji"]}</span>
+                                <div style='flex:1;'>
+                                    <div style='color:#F1F5F9;font-weight:700;font-size:0.9rem;'>{sv['plataforma']}</div>
+                                    <div style='color:#475569;font-size:0.78rem;margin-top:3px;'>📧 {sv['email']}</div>
+                                </div>
+                                <div style='text-align:right;'>
+                                    <div style='color:#34D399;font-weight:700;font-size:0.82rem;'>{sv['estado']}</div>
+                                    <div style='font-size:0.78rem;margin-top:2px;'>{dias_html(d) if sv.get('fecha_vence') else ''}</div>
+                                </div>
+                            </div>
+                        </div>""", unsafe_allow_html=True)
+                else:
+                    st.markdown("<div style='color:#374151;text-align:center;padding:16px;font-size:0.88rem;'>Sin cuentas asignadas.</div>", unsafe_allow_html=True)
+
+            # Botón WhatsApp contacto
+            msg_cli = f"Hola {cli['nombre']}! 👋 Te escribimos desde *STREAMING VIP*."
+            wa_link_cli = f"https://wa.me/{wa}?text={urllib.parse.quote(msg_cli)}"
+            st.markdown(f"""<a href="{wa_link_cli}" target="_blank" style="text-decoration:none;display:inline-block;margin-top:8px;">
+                <div style="background:linear-gradient(135deg,#14532D,#166534);color:#86EFAC;border:1px solid rgba(34,197,94,0.25);
+                    border-radius:10px;padding:8px 20px;font-weight:700;font-size:0.8rem;
+                    box-shadow:0 4px 12px rgba(22,163,74,0.15);">💬 Contactar por WhatsApp</div>
+            </a>""", unsafe_allow_html=True)
 
 # ══════════════════════════════════════════
 # ALERTAS
@@ -938,30 +1169,107 @@ elif "💰" in menu:
     st.markdown("<div class='glow-divider'></div>", unsafe_allow_html=True)
     modo = st.session_state.get('modo', 'PERFILES')
 
+    # ── FILTROS ──
+    st.markdown("""<div style='background:linear-gradient(145deg,#0A0C18,#0D1020);border:1px solid rgba(99,102,241,0.15);border-radius:18px;padding:22px 24px;margin-bottom:24px;'>
+        <div style='color:#A5B4FC;font-weight:700;font-size:0.85rem;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:16px;'>🎛️ Filtros de Análisis</div>
+    """, unsafe_allow_html=True)
+
+    fc1, fc2, fc3 = st.columns(3)
+    plat_filter = fc1.selectbox("🎬 Plataforma", ["TODAS"] + list(PLATAFORMAS.keys()), key="fin_plat")
+    fecha_modo  = fc2.selectbox("📅 Periodo", ["Todo el tiempo", "Hoy", "Últimos 7 días", "Últimos 30 días", "Rango personalizado"], key="fin_fmode")
+    st.markdown("</div>", unsafe_allow_html=True)
+
+    # Rango personalizado
+    fecha_desde = None
+    fecha_hasta = None
+    if fecha_modo == "Rango personalizado":
+        rc1, rc2 = st.columns(2)
+        fecha_desde = rc1.date_input("📆 Desde", value=datetime.now() - timedelta(days=30), key="fin_desde")
+        fecha_hasta = rc2.date_input("📆 Hasta", value=datetime.now(), key="fin_hasta")
+    elif fecha_modo == "Hoy":
+        fecha_desde = datetime.now().date()
+        fecha_hasta = datetime.now().date()
+    elif fecha_modo == "Últimos 7 días":
+        fecha_desde = (datetime.now() - timedelta(days=7)).date()
+        fecha_hasta = datetime.now().date()
+    elif fecha_modo == "Últimos 30 días":
+        fecha_desde = (datetime.now() - timedelta(days=30)).date()
+        fecha_hasta = datetime.now().date()
+
+    # Construir filtro SQL de fecha
+    def build_date_filter(col="fecha_venta"):
+        if fecha_desde and fecha_hasta:
+            desde_str = fecha_desde.strftime("%d/%m/%Y")
+            hasta_str = fecha_hasta.strftime("%d/%m/%Y")
+            return f" AND {col} >= '{desde_str}' AND {col} <= '{hasta_str}'"
+        return ""
+
+    def build_plat_filter(col="plataforma"):
+        if plat_filter != "TODAS":
+            return f" AND {col}='{plat_filter}'"
+        return ""
+
+    # ── MÉTRICAS GLOBALES ──
     if modo == 'PERFILES':
-        ingresos = pd.read_sql_query(f"SELECT SUM(precio_venta) FROM perfiles WHERE estado='VENDIDO' AND creador_id={uid}", conn).iloc[0,0] or 0
-        costos   = pd.read_sql_query(f"SELECT SUM(costo) FROM cuentas WHERE creador_id={uid}", conn).iloc[0,0] or 0
+        q_base = f"FROM perfiles WHERE estado='VENDIDO' AND creador_id={uid}{build_date_filter()}{build_plat_filter()}"
+        ingresos = pd.read_sql_query(f"SELECT COALESCE(SUM(precio_venta),0) {q_base}", conn).iloc[0,0]
+        q_cost   = f"FROM cuentas WHERE creador_id={uid}{build_plat_filter()}"
+        costos   = pd.read_sql_query(f"SELECT COALESCE(SUM(costo),0) {q_cost}", conn).iloc[0,0]
+        total_v  = pd.read_sql_query(f"SELECT COUNT(*) {q_base}", conn).iloc[0,0]
     else:
-        ingresos = pd.read_sql_query(f"SELECT SUM(precio_venta) FROM cuentas_completas WHERE estado='ENTREGADA' AND creador_id={uid}", conn).iloc[0,0] or 0
-        costos   = pd.read_sql_query(f"SELECT SUM(costo) FROM cuentas_completas WHERE creador_id={uid}", conn).iloc[0,0] or 0
+        q_base  = f"FROM cuentas_completas WHERE estado='ENTREGADA' AND creador_id={uid}{build_date_filter()}{build_plat_filter()}"
+        ingresos = pd.read_sql_query(f"SELECT COALESCE(SUM(precio_venta),0) {q_base}", conn).iloc[0,0]
+        q_cost   = f"FROM cuentas_completas WHERE creador_id={uid}{build_plat_filter()}"
+        costos   = pd.read_sql_query(f"SELECT COALESCE(SUM(costo),0) {q_cost}", conn).iloc[0,0]
+        total_v  = pd.read_sql_query(f"SELECT COUNT(*) {q_base}", conn).iloc[0,0]
 
     ganancia = ingresos - costos
     margen = (ganancia / ingresos * 100) if ingresos > 0 else 0
-    c1,c2,c3,c4 = st.columns(4)
+    ticket_prom = (ingresos / total_v) if total_v > 0 else 0
+
+    # Periodo label
+    if fecha_modo == "Rango personalizado" and fecha_desde and fecha_hasta:
+        periodo_label = f"{fecha_desde.strftime('%d/%m/%Y')} → {fecha_hasta.strftime('%d/%m/%Y')}"
+    elif fecha_modo != "Todo el tiempo":
+        periodo_label = fecha_modo
+    else:
+        periodo_label = "Acumulado total"
+
+    st.markdown(f"<div style='color:#6366F1;font-size:0.8rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:12px;'>📊 {periodo_label} · {'Todas las plataformas' if plat_filter == 'TODAS' else plat_filter}</div>", unsafe_allow_html=True)
+
+    c1,c2,c3,c4,c5 = st.columns(5)
     c1.metric("💵 Ingresos", moneda(ingresos))
     c2.metric("📤 Costos", moneda(costos))
     c3.metric("💰 Ganancia", moneda(ganancia))
     c4.metric("📈 Margen", f"{margen:.1f}%")
+    c5.metric("🛒 Ventas", str(total_v))
+
+    # Ticket promedio
+    st.markdown(f"""<div style='background:linear-gradient(145deg,#0D0F1A,#111320);border:1px solid rgba(99,102,241,0.12);border-radius:14px;padding:16px 20px;margin:16px 0;display:flex;align-items:center;gap:16px;'>
+        <div style='font-size:1.6rem;'>🎟️</div>
+        <div>
+            <div style='color:#64748B;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.1em;'>Ticket Promedio por venta</div>
+            <div style='color:#A5B4FC;font-weight:800;font-size:1.4rem;font-family:Syne,sans-serif;'>{moneda(ticket_prom)}</div>
+        </div>
+    </div>""", unsafe_allow_html=True)
 
     st.markdown("<div class='glow-divider'></div>", unsafe_allow_html=True)
     st.markdown("### Detalle por plataforma")
+
     for plat, info in PLATAFORMAS.items():
+        # Saltar si hay filtro de plataforma específico y no coincide
+        if plat_filter != "TODAS" and plat != plat_filter:
+            continue
         if modo == 'PERFILES':
-            ing_p = pd.read_sql_query(f"SELECT SUM(precio_venta) FROM perfiles WHERE plataforma='{plat}' AND estado='VENDIDO' AND creador_id={uid}", conn).iloc[0,0] or 0
-            cst_p = pd.read_sql_query(f"SELECT SUM(costo) FROM cuentas WHERE plataforma='{plat}' AND creador_id={uid}", conn).iloc[0,0] or 0
+            q_p  = f"FROM perfiles WHERE plataforma='{plat}' AND estado='VENDIDO' AND creador_id={uid}{build_date_filter()}"
+            ing_p = pd.read_sql_query(f"SELECT COALESCE(SUM(precio_venta),0) {q_p}", conn).iloc[0,0]
+            cst_p = pd.read_sql_query(f"SELECT COALESCE(SUM(costo),0) FROM cuentas WHERE plataforma='{plat}' AND creador_id={uid}", conn).iloc[0,0]
+            cnt_p = pd.read_sql_query(f"SELECT COUNT(*) {q_p}", conn).iloc[0,0]
         else:
-            ing_p = pd.read_sql_query(f"SELECT SUM(precio_venta) FROM cuentas_completas WHERE plataforma='{plat}' AND estado='ENTREGADA' AND creador_id={uid}", conn).iloc[0,0] or 0
-            cst_p = pd.read_sql_query(f"SELECT SUM(costo) FROM cuentas_completas WHERE plataforma='{plat}' AND creador_id={uid}", conn).iloc[0,0] or 0
+            q_p  = f"FROM cuentas_completas WHERE plataforma='{plat}' AND estado='ENTREGADA' AND creador_id={uid}{build_date_filter()}"
+            ing_p = pd.read_sql_query(f"SELECT COALESCE(SUM(precio_venta),0) {q_p}", conn).iloc[0,0]
+            cst_p = pd.read_sql_query(f"SELECT COALESCE(SUM(costo),0) FROM cuentas_completas WHERE plataforma='{plat}' AND creador_id={uid}", conn).iloc[0,0]
+            cnt_p = pd.read_sql_query(f"SELECT COUNT(*) {q_p}", conn).iloc[0,0]
         if ing_p > 0 or cst_p > 0:
             gan_p = ing_p - cst_p
             st.markdown(f"""<div class='card' style='border-left:3px solid {info["color"]}33;'>
@@ -969,7 +1277,7 @@ elif "💰" in menu:
                     <span style='font-size:1.5rem;'>{info["emoji"]}</span>
                     <div style='flex:1;'>
                         <div style='color:#F1F5F9;font-weight:700;font-family:Syne,sans-serif;'>{plat}</div>
-                        <div style='color:#475569;font-size:0.78rem;margin-top:3px;'>Costo: {moneda(cst_p)}</div>
+                        <div style='color:#475569;font-size:0.78rem;margin-top:3px;'>Costo: {moneda(cst_p)} · {cnt_p} venta(s)</div>
                     </div>
                     <div style='text-align:right;'>
                         <div style='color:#34D399;font-weight:700;'>+{moneda(ing_p)}</div>
@@ -981,7 +1289,7 @@ elif "💰" in menu:
 # ══════════════════════════════════════════
 # USUARIOS (solo ADMIN)
 # ══════════════════════════════════════════
-elif "👥" in menu and st.session_state['u_ran'] == 'ADMIN_GLOBAL':
+elif "🔐" in menu and st.session_state['u_ran'] == 'ADMIN_GLOBAL':
     st.markdown("<div class='title-main'>USUARIOS</div>", unsafe_allow_html=True)
     st.markdown("<div class='subtitle'>Administrar accesos al sistema</div>", unsafe_allow_html=True)
     st.markdown("<div class='glow-divider'></div>", unsafe_allow_html=True)
@@ -989,12 +1297,12 @@ elif "👥" in menu and st.session_state['u_ran'] == 'ADMIN_GLOBAL':
     with st.form("nuevo_user"):
         c1, c2, c3 = st.columns(3)
         nu = c1.text_input("USUARIO")
-        np = c2.text_input("CONTRASEÑA", type="password")
+        np_ = c2.text_input("CONTRASEÑA", type="password")
         nr = c3.selectbox("ROL", ["OPERADOR", "ADMIN_GLOBAL"])
         if st.form_submit_button("➕  CREAR USUARIO", use_container_width=True):
-            if nu and np:
+            if nu and np_:
                 try:
-                    conn.cursor().execute("INSERT INTO usuarios (user, password, rango) VALUES (?,?,?)", (nu, hash_pass(np), nr))
+                    conn.cursor().execute("INSERT INTO usuarios (user, password, rango) VALUES (?,?,?)", (nu, hash_pass(np_), nr))
                     conn.commit(); st.success(f"✅ Usuario {nu} creado.")
                 except: st.error("El usuario ya existe.")
 
@@ -1002,15 +1310,24 @@ elif "👥" in menu and st.session_state['u_ran'] == 'ADMIN_GLOBAL':
     users = pd.read_sql_query("SELECT id, user, rango FROM usuarios", conn)
     for _, row in users.iterrows():
         icono = "👑" if row['rango'] == 'ADMIN_GLOBAL' else "👤"
-        st.markdown(f"""<div class='card'>
-            <div style='display:flex;align-items:center;gap:14px;'>
-                <span style='font-size:1.4rem;'>{icono}</span>
-                <div style='flex:1;'>
-                    <div style='color:#F1F5F9;font-weight:700;font-family:Syne,sans-serif;'>{row["user"]}</div>
-                    <div style='color:#475569;font-size:0.78rem;margin-top:2px;'>{row["rango"]}</div>
+        u_col1, u_col2 = st.columns([4, 1])
+        with u_col1:
+            st.markdown(f"""<div class='card'>
+                <div style='display:flex;align-items:center;gap:14px;'>
+                    <span style='font-size:1.4rem;'>{icono}</span>
+                    <div style='flex:1;'>
+                        <div style='color:#F1F5F9;font-weight:700;font-family:Syne,sans-serif;'>{row["user"]}</div>
+                        <div style='color:#475569;font-size:0.78rem;margin-top:2px;'>{row["rango"]}</div>
+                    </div>
                 </div>
-            </div>
-        </div>""", unsafe_allow_html=True)
+            </div>""", unsafe_allow_html=True)
+        with u_col2:
+            if row['user'] != 'admin':
+                st.markdown("<div class='btn-danger'>", unsafe_allow_html=True)
+                if st.button("🗑️", key=f"del_u_{row['id']}", use_container_width=True):
+                    conn.cursor().execute("DELETE FROM usuarios WHERE id=?", (row['id'],))
+                    conn.commit(); st.rerun()
+                st.markdown("</div>", unsafe_allow_html=True)
 
 # ══════════════════════════════════════════
 # ELIMINAR (solo ADMIN)
@@ -1023,28 +1340,105 @@ elif "🗑️" in menu and st.session_state['u_ran'] == 'ADMIN_GLOBAL':
     </div>""", unsafe_allow_html=True)
 
     modo = st.session_state.get('modo', 'PERFILES')
+
     if modo == 'PERFILES':
-        ctas_e = pd.read_sql_query(f"SELECT email FROM cuentas WHERE creador_id={uid}", conn)
+        st.markdown("### Eliminar por Plataforma")
+
+        # Selector de plataforma para filtrar
+        del_plat = st.selectbox("🎬 Filtrar por plataforma", ["TODAS"] + list(PLATAFORMAS.keys()), key="del_plat_filter")
+
+        if del_plat == "TODAS":
+            ctas_e = pd.read_sql_query(f"SELECT email, plataforma FROM cuentas WHERE creador_id={uid} ORDER BY plataforma, email", conn)
+        else:
+            ctas_e = pd.read_sql_query(f"SELECT email, plataforma FROM cuentas WHERE creador_id={uid} AND plataforma='{del_plat}' ORDER BY email", conn)
+
         if not ctas_e.empty:
-            mail_del = st.selectbox("Selecciona cuenta maestra a eliminar", ctas_e['email'].tolist())
-            st.markdown("<div class='btn-danger'>", unsafe_allow_html=True)
-            if st.button("🗑️  ELIMINAR CUENTA Y TODOS SUS PERFILES", use_container_width=True):
-                conn.cursor().execute("DELETE FROM perfiles WHERE email=?", (mail_del,))
-                conn.cursor().execute("DELETE FROM cuentas WHERE email=?", (mail_del,))
-                conn.commit(); st.success("Cuenta eliminada."); st.rerun()
-            st.markdown("</div>", unsafe_allow_html=True)
-        else: st.info("No hay cuentas para eliminar.")
-    else:
-        ctas_e = pd.read_sql_query(f"SELECT id, email FROM cuentas_completas WHERE creador_id={uid}", conn)
+            # Mostrar cuentas de la plataforma seleccionada
+            st.markdown(f"<div style='color:#475569;font-size:0.82rem;margin-bottom:12px;'>{len(ctas_e)} cuenta(s) encontrada(s)</div>", unsafe_allow_html=True)
+
+            for _, row_e in ctas_e.iterrows():
+                info_e = PLATAFORMAS.get(row_e['plataforma'], {"color":"#6366F1","emoji":"▶"})
+                np_count = pd.read_sql_query(f"SELECT COUNT(*) FROM perfiles WHERE email='{row_e['email']}' AND creador_id={uid}", conn).iloc[0,0]
+                col_inf, col_btn = st.columns([4, 1])
+                with col_inf:
+                    st.markdown(f"""<div class='card' style='border-left:3px solid {info_e["color"]}33;margin:4px 0;'>
+                        <div style='display:flex;align-items:center;gap:12px;'>
+                            <span>{info_e["emoji"]}</span>
+                            <div>
+                                <div style='color:#F1F5F9;font-weight:700;font-size:0.9rem;'>{row_e['email']}</div>
+                                <div style='color:#475569;font-size:0.78rem;'>{row_e['plataforma']} · {np_count} perfil(es)</div>
+                            </div>
+                        </div>
+                    </div>""", unsafe_allow_html=True)
+                with col_btn:
+                    st.markdown("<div class='btn-danger'>", unsafe_allow_html=True)
+                    if st.button("🗑️ Eliminar", key=f"del_{row_e['email']}", use_container_width=True):
+                        conn.cursor().execute("DELETE FROM perfiles WHERE email=?", (row_e['email'],))
+                        conn.cursor().execute("DELETE FROM cuentas WHERE email=?", (row_e['email'],))
+                        conn.commit(); st.success(f"Cuenta {row_e['email']} eliminada."); st.rerun()
+                    st.markdown("</div>", unsafe_allow_html=True)
+
+            # Botón eliminar todas las de la plataforma
+            if del_plat != "TODAS":
+                st.markdown("<div class='glow-divider'></div>", unsafe_allow_html=True)
+                st.markdown(f"<div style='color:#F87171;font-weight:700;margin-bottom:8px;'>⚠️ Eliminar TODAS las cuentas de {del_plat}</div>", unsafe_allow_html=True)
+                st.markdown("<div class='btn-danger'>", unsafe_allow_html=True)
+                if st.button(f"🗑️  ELIMINAR TODAS LAS CUENTAS DE {del_plat}", use_container_width=True):
+                    emails_plat = pd.read_sql_query(f"SELECT email FROM cuentas WHERE plataforma='{del_plat}' AND creador_id={uid}", conn)['email'].tolist()
+                    for em in emails_plat:
+                        conn.cursor().execute("DELETE FROM perfiles WHERE email=?", (em,))
+                        conn.cursor().execute("DELETE FROM cuentas WHERE email=?", (em,))
+                    conn.commit(); st.success(f"Todas las cuentas de {del_plat} eliminadas."); st.rerun()
+                st.markdown("</div>", unsafe_allow_html=True)
+        else:
+            st.info("No hay cuentas para la selección actual.")
+
+    else:  # CUENTAS COMPLETAS
+        st.markdown("### Eliminar Cuentas Completas por Plataforma")
+
+        del_plat = st.selectbox("🎬 Filtrar por plataforma", ["TODAS"] + list(PLATAFORMAS.keys()), key="del_plat_filter_c")
+
+        if del_plat == "TODAS":
+            ctas_e = pd.read_sql_query(f"SELECT id, email, plataforma, estado FROM cuentas_completas WHERE creador_id={uid} ORDER BY plataforma, email", conn)
+        else:
+            ctas_e = pd.read_sql_query(f"SELECT id, email, plataforma, estado FROM cuentas_completas WHERE creador_id={uid} AND plataforma='{del_plat}' ORDER BY email", conn)
+
         if not ctas_e.empty:
-            mail_del = st.selectbox("Selecciona cuenta a eliminar", ctas_e['email'].tolist())
-            id_del = ctas_e[ctas_e['email'] == mail_del]['id'].values[0]
-            st.markdown("<div class='btn-danger'>", unsafe_allow_html=True)
-            if st.button("🗑️  ELIMINAR CUENTA", use_container_width=True):
-                conn.cursor().execute("DELETE FROM cuentas_completas WHERE id=?", (int(id_del),))
-                conn.commit(); st.success("Cuenta eliminada."); st.rerun()
-            st.markdown("</div>", unsafe_allow_html=True)
-        else: st.info("No hay cuentas para eliminar.")
+            st.markdown(f"<div style='color:#475569;font-size:0.82rem;margin-bottom:12px;'>{len(ctas_e)} cuenta(s) encontrada(s)</div>", unsafe_allow_html=True)
+
+            for _, row_e in ctas_e.iterrows():
+                info_e = PLATAFORMAS.get(row_e['plataforma'], {"color":"#6366F1","emoji":"▶"})
+                badge_e = "<span class='badge badge-disponible'>DISPONIBLE</span>" if row_e['estado'] == 'DISPONIBLE' else "<span class='badge badge-entregado'>ENTREGADA</span>"
+                col_inf, col_btn = st.columns([4, 1])
+                with col_inf:
+                    st.markdown(f"""<div class='card' style='border-left:3px solid {info_e["color"]}33;margin:4px 0;'>
+                        <div style='display:flex;align-items:center;gap:12px;'>
+                            <span>{info_e["emoji"]}</span>
+                            <div style='flex:1;'>
+                                <div style='display:flex;align-items:center;gap:8px;'>
+                                    <span style='color:#F1F5F9;font-weight:700;font-size:0.9rem;'>{row_e['email']}</span>{badge_e}
+                                </div>
+                                <div style='color:#475569;font-size:0.78rem;'>{row_e['plataforma']}</div>
+                            </div>
+                        </div>
+                    </div>""", unsafe_allow_html=True)
+                with col_btn:
+                    st.markdown("<div class='btn-danger'>", unsafe_allow_html=True)
+                    if st.button("🗑️ Eliminar", key=f"cdel_{row_e['id']}", use_container_width=True):
+                        conn.cursor().execute("DELETE FROM cuentas_completas WHERE id=?", (int(row_e['id']),))
+                        conn.commit(); st.success(f"Cuenta {row_e['email']} eliminada."); st.rerun()
+                    st.markdown("</div>", unsafe_allow_html=True)
+
+            if del_plat != "TODAS":
+                st.markdown("<div class='glow-divider'></div>", unsafe_allow_html=True)
+                st.markdown(f"<div style='color:#F87171;font-weight:700;margin-bottom:8px;'>⚠️ Eliminar TODAS las cuentas de {del_plat}</div>", unsafe_allow_html=True)
+                st.markdown("<div class='btn-danger'>", unsafe_allow_html=True)
+                if st.button(f"🗑️  ELIMINAR TODAS LAS CUENTAS DE {del_plat}", use_container_width=True):
+                    conn.cursor().execute(f"DELETE FROM cuentas_completas WHERE plataforma='{del_plat}' AND creador_id={uid}")
+                    conn.commit(); st.success(f"Todas las cuentas de {del_plat} eliminadas."); st.rerun()
+                st.markdown("</div>", unsafe_allow_html=True)
+        else:
+            st.info("No hay cuentas para la selección actual.")
 
 # ══════════════════════════════════════════
 # CAMBIAR CLAVE
