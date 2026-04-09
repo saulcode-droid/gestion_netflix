@@ -1,2 +1,4 @@
-streamlit
-pandas
+flask
+flask-cors
+gunicorn
+openpyxl
